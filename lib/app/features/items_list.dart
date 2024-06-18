@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: "Lista de compras",
-    theme: ThemeData(
-      brightness: Brightness.light,
-    ),
-    home: const HomePage(),
-  ));
-}
-
 class Produto {
   double preco;
   String nomeProduto;
@@ -31,7 +20,11 @@ double TotalPreco(List<Produto> produtos) {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String nomeLista;
+  final String precoLista;
+
+  const HomePage(
+      {super.key, required this.nomeLista, required this.precoLista});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -50,15 +43,17 @@ class _HomePageState extends State<HomePage> {
   // Método para carregar os dados salvos
   void _loadCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? produtosSalvos = prefs.getStringList('compras');
+    List<String>? produtosSalvos =
+        prefs.getStringList('compras_${widget.nomeLista}');
     if (produtosSalvos != null) {
       setState(() {
         _compras = produtosSalvos.map((produtoString) {
           List<String> dados = produtoString.split(':');
           return Produto(
-              nomeProduto: dados[0],
-              preco: double.parse(dados[1]),
-              quantidade: int.parse(dados[1]));
+            nomeProduto: dados[0],
+            preco: double.parse(dados[1]),
+            quantidade: int.parse(dados[2]),
+          );
         }).toList();
         _totalPreco = TotalPreco(_compras);
       });
@@ -72,7 +67,8 @@ class _HomePageState extends State<HomePage> {
         .map((produto) =>
             "${produto.nomeProduto}:${produto.preco.toString()}:${produto.quantidade.toString()}")
         .toList();
-    await prefs.setStringList('compras', produtosParaSalvar);
+    await prefs.setStringList(
+        'compras_${widget.nomeLista}', produtosParaSalvar);
   }
 
   @override
@@ -81,9 +77,9 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFFd2f8d6),
       appBar: AppBar(
         backgroundColor: const Color(0xFF11e333),
-        title: const Text(
-          'Lista de compras',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          widget.nomeLista,
+          style: const TextStyle(color: Colors.white),
         ),
         centerTitle: true,
       ),
@@ -107,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
-                  color: Colors.red,
+                  color: Colors.red[900],
                   onPressed: () {
                     setState(() {
                       _compras.removeAt(index);
@@ -174,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         onChanged: (String value) {
                           novoProduto.quantidade = int.tryParse(value) ??
-                              0; // Atualiza o preço do produto
+                              0; // Atualiza a quantidade do produto
                         },
                       ),
                     ),
