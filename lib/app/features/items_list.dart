@@ -20,6 +20,7 @@ class Produto {
   Produto({this.nomeProduto = '', this.preco = 0.0, this.quantidade = 0});
 }
 
+// ignore: non_constant_identifier_names
 double TotalPreco(List<Produto> produtos) {
   double soma = 0;
 
@@ -30,7 +31,7 @@ double TotalPreco(List<Produto> produtos) {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -99,9 +100,9 @@ class _HomePageState extends State<HomePage> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${_compras[index].nomeProduto}'),
+                    Text(_compras[index].nomeProduto),
                     Text('\$ ${_compras[index].preco.toStringAsFixed(2)}'),
-                    Text(' ${_compras[index].quantidade.toStringAsFixed(2)}'),
+                    Text(' ${_compras[index].quantidade.toStringAsFixed(0)}'),
                   ],
                 ),
                 trailing: IconButton(
@@ -136,6 +137,7 @@ class _HomePageState extends State<HomePage> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
+                    const SizedBox(height: 12),
                     TextField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
@@ -162,6 +164,7 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                     ),
+                    const SizedBox(height: 12),
                     SizedBox(
                       width: 200,
                       child: TextField(
