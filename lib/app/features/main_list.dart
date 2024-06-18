@@ -1,5 +1,6 @@
 import 'package:app_lista_de_compras/app/features/items_list.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainListView extends StatefulWidget {
   const MainListView({super.key});
@@ -10,6 +11,36 @@ class MainListView extends StatefulWidget {
 
 class _MainListViewState extends State<MainListView> {
   final List<Map<String, dynamic>> _listasDeCompras = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadListasDeCompras();
+  }
+
+  Future<void> _loadListasDeCompras() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? listasDeComprasString = prefs.getStringList('listasDeCompras');
+    if (listasDeComprasString != null) {
+      setState(() {
+        _listasDeCompras.addAll(listasDeComprasString.map((item) {
+          final parts = item.split(';');
+          return {
+            'nome': parts[0],
+            'preco': parts[1],
+          };
+        }).toList());
+      });
+    }
+  }
+
+  Future<void> _saveListasDeCompras() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> listasDeComprasString = _listasDeCompras.map((item) {
+      return '${item['nome']};${item['preco']}';
+    }).toList();
+    prefs.setStringList('listasDeCompras', listasDeComprasString);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +79,7 @@ class _MainListViewState extends State<MainListView> {
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 0,
                               blurRadius: 8,
-                              offset: const Offset(
-                                  0, 2), // changes position of shadow
+                              offset: const Offset(0, 2), // changes position of shadow
                             ),
                           ],
                         ),
@@ -66,8 +96,7 @@ class _MainListViewState extends State<MainListView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _formatDate(DateTime
-                                    .now()), // Exibe a data atual formatada
+                                _formatDate(DateTime.now()), // Exibe a data atual formatada
                                 style: const TextStyle(
                                   color: Colors.black26,
                                   fontSize: 14,
@@ -96,8 +125,8 @@ class _MainListViewState extends State<MainListView> {
                                 color: Colors.red[900], size: 35),
                             onPressed: () {
                               setState(() {
-                                _listasDeCompras.removeAt(
-                                    index); // Remove o item da lista ao clicar no ícone de delete
+                                _listasDeCompras.removeAt(index);
+                                _saveListasDeCompras(); // Salva os dados após remover o item
                               });
                             },
                           ),
@@ -105,7 +134,11 @@ class _MainListViewState extends State<MainListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const HomePage()),
+                                builder: (context) => HomePage(
+                                  nomeLista: _listasDeCompras[index]['nome'],
+                                  precoLista: _listasDeCompras[index]['preco'],
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -123,16 +156,15 @@ class _MainListViewState extends State<MainListView> {
               backgroundColor: const Color(0xFF11E333),
               shape: const CircleBorder(),
               onPressed: () {
-// Ação ao pressionar o botão
                 setState(() {
-// Adiciona um novo item à lista
                   _listasDeCompras.add({
                     'nome': 'Lista ${_listasDeCompras.length + 1}',
                     'preco': '90,00', // Valor exemplo, pode ser dinâmico
                   });
+                  _saveListasDeCompras(); // Salva os dados após adicionar o item
                 });
               },
-              child: const Icon(Icons.add, size: 40),
+              child: const Icon(Icons.add, size: 40, color: Colors.white,),
             ),
           ),
         ],
