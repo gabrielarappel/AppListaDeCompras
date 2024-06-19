@@ -19,12 +19,12 @@ class ItemsList extends StatefulWidget {
   final void Function(double) updateSomaPrecoLista;
 
   const ItemsList({
-    super.key,
+    Key? key,
     required this.nomeLista,
     required this.precoLista,
     required this.somaPrecoLista,
     required this.updateSomaPrecoLista,
-  });
+  }) : super(key: key);
 
   @override
   State<ItemsList> createState() => _ItemsListState();
@@ -83,45 +83,47 @@ class _ItemsListState extends State<ItemsList> {
         centerTitle: true,
       ),
       body: ListView.builder(
-  itemCount: _compras.length,
-  itemBuilder: (BuildContext context, int index) {
-    return Dismissible(
-      key: Key(_compras[index].nomeProduto), // Chave única para cada item
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
-        setState(() {
-          _compras.removeAt(index);
-          _totalPreco = totalPreco(_compras);
-          _saveCompras();
-        });
-      },
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        padding: EdgeInsets.only(right: 20.0),
-        child: Icon(Icons.delete, color: Colors.white),
-      ),
-      child: Card(
-        child: ListTile(
-          title: Text(_compras[index].nomeProduto),
-          subtitle: Text(
-            'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()}',
-          ),
-          trailing: IconButton(
+        itemCount: _compras.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Dismissible(
+            key: Key(_compras[index].nomeProduto), // Chave única para cada item
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) {
+              setState(() {
+                _compras.removeAt(index);
+                _totalPreco = totalPreco(_compras);
+                _saveCompras();
+                widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
+              });
+            },
+            background: Container(
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.only(right: 20.0),
+              child: Icon(Icons.delete, color: Colors.white),
+            ),
+            child: Card(
+              child: ListTile(
+                title: Text(_compras[index].nomeProduto),
+                subtitle: Text(
+                  'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()}',
+                ),
+                trailing: IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       _compras.removeAt(index);
                       _totalPreco = totalPreco(_compras);
                       _saveCompras();
+                      widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
                     });
                   },
                 ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
-    );
-  },
-),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xff11e333),
         onPressed: () {
@@ -134,7 +136,7 @@ class _ItemsListState extends State<ItemsList> {
                     _compras.add(novoProduto);
                     _totalPreco = totalPreco(_compras);
                     _saveCompras();
-                    widget.updateSomaPrecoLista(_totalPreco);
+                    widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
                   });
                 },
               );
@@ -147,71 +149,6 @@ class _ItemsListState extends State<ItemsList> {
         ),
       ),
       bottomNavigationBar: BottomTotalPrice(totalPreco: _totalPreco),
-    );
-  }
-}
-
-final List<String> _categorias = [
-  'Ferramentas',
-  'Comida',
-  'Eletronicos',
-  'Limpeza',
-  'Jogos',
-  'Bebidas'
-];
-
-final Map<String, Color> categoriaCores = {
-  'Ferramentas': Colors.blue,
-  'Comida': Colors.red,
-  'Eletronicos': Colors.green,
-  'Limpeza': Colors.orange,
-  'Jogos': Colors.purple,
-  'Bebidas': Colors.brown,
-};
-
-class DropdownButtonWidget extends StatefulWidget {
-  final List<String> categorias;
-
-  const DropdownButtonWidget({super.key, required this.categorias});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _DropdownButtonWidgetState createState() => _DropdownButtonWidgetState();
-}
-
-class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
-  String dropdownValue = 'Ferramentas'; // Valor inicial do dropdown
-
-  @override
-  Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: 'Categorias',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: dropdownValue,
-          icon: const Icon(Icons.arrow_drop_down),
-          iconSize: 24,
-          elevation: 16,
-          style: const TextStyle(color: Colors.deepPurple),
-          onChanged: (String? newValue) {
-            setState(() {
-              dropdownValue = newValue!;
-            });
-          },
-          items: _categorias.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child:
-                  Text(value, style: TextStyle(color: categoriaCores[value])),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 }

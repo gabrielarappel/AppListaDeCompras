@@ -4,7 +4,7 @@ import 'items_list.dart';
 import 'widgets/add_list_dialog.dart'; // Import the dialog
 
 class MainListView extends StatefulWidget {
-  const MainListView({super.key});
+  const MainListView({Key? key});
 
   @override
   State<MainListView> createState() => _MainListViewState();
@@ -26,6 +26,7 @@ class _MainListViewState extends State<MainListView> {
         prefs.getStringList('listasDeCompras');
     if (listasDeComprasString != null) {
       setState(() {
+        _listasDeCompras.clear(); // Limpa a lista atual antes de adicionar novos itens
         _listasDeCompras.addAll(listasDeComprasString.map((item) {
           final parts = item.split(';');
           return {
@@ -89,13 +90,19 @@ class _MainListViewState extends State<MainListView> {
         title: const Text(
           "Minhas Listas",
           style: TextStyle(
-              color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 32,),
+            color: Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 32,
+          ),
         ),
         backgroundColor: const Color(0xffD2F8D6),
       ),
       body: _listasDeCompras.isEmpty
           ? const Center(
-              child: Text("Crie suas listas de compras!", style: TextStyle(fontSize: 24),),
+              child: Text(
+                "Crie suas listas de compras!",
+                style: TextStyle(fontSize: 24),
+              ),
             )
           : ListView.builder(
               itemCount: _listasDeCompras.length,
@@ -169,8 +176,8 @@ class _MainListViewState extends State<MainListView> {
                                 });
                               },
                             ),
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ItemsList(
@@ -189,6 +196,7 @@ class _MainListViewState extends State<MainListView> {
                                   ),
                                 ),
                               );
+                              _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao retornar de ItemsList
                             },
                           ),
                         ),
