@@ -9,7 +9,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Lista de compras',
-        theme: ThemeData.light(),
+        theme: ThemeData(
+         fontFamily: 'Roboto',
+        ),
         home: const SplashView());
   }
+}
+
+void main() {
+  runApp(const MyApp());
 }
