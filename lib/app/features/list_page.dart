@@ -34,7 +34,7 @@ class _ListaPageState extends State<ListaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Minhas Listas'),
+        title: Center(child: Text('Minhas Listas')),
       ),
       body: ListView.builder(
         itemCount: _listas.length,
