@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class Produto {
-  double preco;
-  String nomeProduto;
-  int quantidade;
-  bool isChecked;
-
-  Produto({
-    this.nomeProduto = '',
-    this.preco = 0.0,
-    this.quantidade = 1,
-    this.isChecked = false,
-  });
-}
+import 'package:app_lista_de_compras/app/features/model/produto.dart';
+import 'package:app_lista_de_compras/app/features/widgets/bottom_total_price.dart';
+import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart'; // Importe o novo widget
 
 double totalPreco(List<Produto> produtos) {
   double soma = 0;
@@ -27,8 +16,7 @@ class ItemsList extends StatefulWidget {
   final String nomeLista;
   final String precoLista;
   final double somaPrecoLista;
-  final void Function(double)
-      updateSomaPrecoLista; // Função para atualizar _somaPrecoLista em MainListView
+  final void Function(double) updateSomaPrecoLista;
 
   const ItemsList({
     super.key,
@@ -65,7 +53,7 @@ class _ItemsListState extends State<ItemsList> {
             nomeProduto: dados[0],
             preco: double.parse(dados[1]),
             quantidade: int.parse(dados[2]),
-            isChecked: false,
+            isChecked: dados[3] == 'true',
           );
         }).toList();
         _totalPreco = totalPreco(_compras);
@@ -77,7 +65,7 @@ class _ItemsListState extends State<ItemsList> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> produtosParaSalvar = _compras
         .map((produto) =>
-            "${produto.nomeProduto}:${produto.preco.toString()}:${produto.quantidade.toString()}")
+            "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.isChecked}")
         .toList();
     await prefs.setStringList(
         'compras_${widget.nomeLista}', produtosParaSalvar);
@@ -115,16 +103,13 @@ class _ItemsListState extends State<ItemsList> {
                         onChanged: (value) {
                           setState(() {
                             _compras[index].isChecked = value ?? false;
-                            _totalPreco = totalPreco(_compras);
                             _saveCompras();
-                            widget.updateSomaPrecoLista(
-                                _totalPreco); // Atualiza o valor em MainListView
                           });
                         },
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        '${_compras[index].nomeProduto}  -  ${_compras[index].quantidade.toStringAsFixed(0)}x',
+                        '${_compras[index].nomeProduto}  -  ${_compras[index].quantidade}x',
                         style: TextStyle(
                           decoration: _compras[index].isChecked
                               ? TextDecoration.lineThrough
@@ -144,8 +129,7 @@ class _ItemsListState extends State<ItemsList> {
                     _compras.removeAt(index);
                     _totalPreco = totalPreco(_compras);
                     _saveCompras();
-                    widget.updateSomaPrecoLista(
-                        _totalPreco); // Atualiza o valor em MainListView
+                    widget.updateSomaPrecoLista(_totalPreco);
                   });
                 },
               ),
@@ -159,97 +143,15 @@ class _ItemsListState extends State<ItemsList> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              Produto novoProduto = Produto();
-
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                title: const Text("Adicione um produto"),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 12,
-                      width: 400,
-                    ),
-                    TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Nome do produto',
-                      ),
-                      onChanged: (String value) {
-                        novoProduto.nomeProduto = value;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: 180,
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'Preço',
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            onChanged: (String value) {
-                              novoProduto.preco = double.tryParse(value) ?? 0.0;
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 180,
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'Quantidade',
-                            ),
-                            onChanged: (String value) {
-                              novoProduto.quantidade = int.tryParse(value) ?? 0;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-                actions: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            "Cancelar",
-                            style: TextStyle(color: Colors.red[900]),
-                          )),
-                          TextButton(
-                    onPressed: () {
-                      setState(() {
-                        novoProduto.isChecked = false;
-                        _compras.add(novoProduto);
-                        _totalPreco = totalPreco(_compras);
-                        _saveCompras();
-                        widget.updateSomaPrecoLista(
-                            _totalPreco); // Atualiza o valor em MainListView
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text(
-                      'Adicionar',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                    ],
-                  ),
-                  
-                ],
+              return AddProductDialog(
+                onAddProduct: (Produto novoProduto) {
+                  setState(() {
+                    _compras.add(novoProduto);
+                    _totalPreco = totalPreco(_compras);
+                    _saveCompras();
+                    widget.updateSomaPrecoLista(_totalPreco);
+                  });
+                },
               );
             },
           );
@@ -259,31 +161,7 @@ class _ItemsListState extends State<ItemsList> {
           color: Colors.white,
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.grey[800],
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Total:',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'R\$ ${_totalPreco.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: BottomTotalPrice(totalPreco: _totalPreco),
     );
   }
 }
