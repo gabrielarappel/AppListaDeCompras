@@ -2,13 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'items_list.dart'; // Importe a HomePage
 
+class Listas {
+  String nomeLista;
+  double precoTotal;
+
+  Listas({this.nomeLista = '', this.precoTotal = 0.0});
+
+  // Método para converter objeto Listas para string (para salvar no SharedPreferences)
+  String toString() {
+    return nomeLista; // Nesse exemplo, estamos convertendo apenas o nome da lista para string
+  }
+}
+
 class ListaPage extends StatefulWidget {
   @override
   _ListaPageState createState() => _ListaPageState();
 }
 
 class _ListaPageState extends State<ListaPage> {
-  List<String> _listas = []; // Lista de nomes das listas
+  List<Listas> _listas = []; // Lista de objetos Listas
 
   @override
   void initState() {
@@ -19,15 +31,21 @@ class _ListaPageState extends State<ListaPage> {
   void _loadListas() async {
     // Carrega as listas salvas do SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> stringListas = prefs.getStringList('listas') ?? [];
+    
     setState(() {
-      _listas = prefs.getStringList('listas') ?? [];
+      _listas = stringListas.map((item) {
+        List<String> parts = item.split(';'); // Separar nomeLista e precoTotal
+        return Listas(nomeLista: parts[0], precoTotal: double.parse(parts[1]));
+      }).toList();
     });
   }
 
   void _saveListas() async {
     // Salva as listas no SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('listas', _listas);
+    List<String> stringListas = _listas.map((lista) => "${lista.nomeLista};${lista.precoTotal}").toList();
+    await prefs.setStringList('listas', stringListas);
   }
 
   @override
@@ -40,14 +58,15 @@ class _ListaPageState extends State<ListaPage> {
         itemCount: _listas.length,
         itemBuilder: (BuildContext context, int index) {
           return ListTile(
-            title: Text(_listas[index]),
+            title: Text(_listas[index].nomeLista),
+            subtitle: Text('Preço Total: R\$ ${_listas[index].precoTotal.toStringAsFixed(2)}'),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => HomePage(
-                    nomeLista: _listas[index],
-                    precoLista: '0.00', // Pode adicionar um preço inicial aqui se necessário
+                    nomeLista: _listas[index].nomeLista,
+                    precoLista: _listas[index].precoTotal.toStringAsFixed(2),
                   ),
                 ),
               );
@@ -77,7 +96,7 @@ class _ListaPageState extends State<ListaPage> {
                       String nomeLista = _controller.text.trim();
                       if (nomeLista.isNotEmpty) {
                         setState(() {
-                          _listas.add(nomeLista);
+                          _listas.add(Listas(nomeLista: nomeLista, precoTotal: 0.0));
                           _saveListas();
                         });
                         Navigator.of(context).pop();

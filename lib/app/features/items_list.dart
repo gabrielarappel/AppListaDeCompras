@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Produto {
-  double preco;
+  
   String nomeProduto;
+  double preco;
   int quantidade;
 
   Produto({this.nomeProduto = '', this.preco = 0.0, this.quantidade = 0});
