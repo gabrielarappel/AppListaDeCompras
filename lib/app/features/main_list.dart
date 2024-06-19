@@ -1,6 +1,6 @@
-import 'package:app_lista_de_compras/app/features/items_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'items_list.dart';
 
 class MainListView extends StatefulWidget {
   const MainListView({super.key});
@@ -11,6 +11,7 @@ class MainListView extends StatefulWidget {
 
 class _MainListViewState extends State<MainListView> {
   final List<Map<String, dynamic>> _listasDeCompras = [];
+  double _somaPrecoLista = 0.0;
 
   @override
   void initState() {
@@ -20,18 +21,30 @@ class _MainListViewState extends State<MainListView> {
 
   Future<void> _loadListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? listasDeComprasString = prefs.getStringList('listasDeCompras');
+    final List<String>? listasDeComprasString =
+        prefs.getStringList('listasDeCompras');
     if (listasDeComprasString != null) {
       setState(() {
         _listasDeCompras.addAll(listasDeComprasString.map((item) {
           final parts = item.split(';');
           return {
             'nome': parts[0],
-            'preco': parts[1],
+            'preco': double.parse(parts[1]),
           };
         }).toList());
+        _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao carregar as listas de compras
       });
     }
+  }
+
+  void _updateSomaPrecoLista() {
+    double total = 0;
+    for (var lista in _listasDeCompras) {
+      total += lista['preco'];
+    }
+    setState(() {
+      _somaPrecoLista = total;
+    });
   }
 
   Future<void> _saveListasDeCompras() async {
@@ -52,6 +65,7 @@ class _MainListViewState extends State<MainListView> {
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
+            fontSize: 32
           ),
         ),
         backgroundColor: const Color(0xffD2F8D6),
@@ -72,14 +86,17 @@ class _MainListViewState extends State<MainListView> {
                       widthFactor: 0.9,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white, // Cor de fundo do Container
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 0,
                               blurRadius: 8,
-                              offset: const Offset(0, 2), // changes position of shadow
+                              offset: const Offset(
+                                0,
+                                2,
+                              ),
                             ),
                           ],
                         ),
@@ -96,37 +113,33 @@ class _MainListViewState extends State<MainListView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _formatDate(DateTime.now()), // Exibe a data atual formatada
+                                _formatDate(DateTime.now()),
                                 style: const TextStyle(
                                   color: Colors.black26,
                                   fontSize: 14,
                                 ),
                               ),
                               const Divider(),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.attach_money,
-                                    color: Colors.black54,
-                                  ),
-                                  Text(
-                                    ": ${_listasDeCompras[index]['preco']}", // Preço vindo dos dados da lista
-                                    style: const TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                '\$ ${_listasDeCompras[index]['preco'].toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 18,
+                                ),
                               ),
                             ],
                           ),
                           trailing: IconButton(
-                            icon: Icon(Icons.delete_forever_outlined,
-                                color: Colors.red[900], size: 35),
+                            icon: Icon(
+                              Icons.delete_forever_outlined,
+                              color: Colors.red[900],
+                              size: 35,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _listasDeCompras.removeAt(index);
-                                _saveListasDeCompras(); // Salva os dados após remover o item
+                                _saveListasDeCompras();
+                                _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao remover uma lista
                               });
                             },
                           ),
@@ -134,9 +147,19 @@ class _MainListViewState extends State<MainListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => HomePage(
+                                builder: (context) => ItemsList(
                                   nomeLista: _listasDeCompras[index]['nome'],
-                                  precoLista: _listasDeCompras[index]['preco'],
+                                  precoLista: _listasDeCompras[index]['preco']
+                                      .toString(),
+                                  somaPrecoLista: _somaPrecoLista,
+                                  updateSomaPrecoLista: (double novoTotal) {
+                                    setState(() {
+                                      _listasDeCompras[index]['preco'] =
+                                          novoTotal;
+                                      _saveListasDeCompras();
+                                      _updateSomaPrecoLista();
+                                    });
+                                  },
                                 ),
                               ),
                             );
@@ -150,8 +173,8 @@ class _MainListViewState extends State<MainListView> {
             },
           ),
           Positioned(
-            bottom: 16, // Posição em relação à parte inferior da tela
-            right: 16, // Posição em relação à parte direita da tela
+            bottom: 16,
+            right: 16,
             child: FloatingActionButton(
               backgroundColor: const Color(0xFF11E333),
               shape: const CircleBorder(),
@@ -159,12 +182,17 @@ class _MainListViewState extends State<MainListView> {
                 setState(() {
                   _listasDeCompras.add({
                     'nome': 'Lista ${_listasDeCompras.length + 1}',
-                    'preco': '90,00', // Valor exemplo, pode ser dinâmico
+                    'preco': 0.0,
                   });
-                  _saveListasDeCompras(); // Salva os dados após adicionar o item
+                  _saveListasDeCompras();
+                  _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
                 });
               },
-              child: const Icon(Icons.add, size: 40, color: Colors.white,),
+              child: const Icon(
+                Icons.add,
+                size: 40,
+                color: Colors.white,
+              ),
             ),
           ),
         ],
