@@ -175,6 +175,15 @@ final List<String> _categorias = [
   'Bebidas'
 ];
 
+final Map<String, Color> categoriaCores = {
+  'Ferramentas': Colors.blue,
+  'Comida': Colors.red,
+  'Eletronicos': Colors.green,
+  'Limpeza': Colors.orange,
+  'Jogos': Colors.purple,
+  'Bebidas': Colors.brown,
+};
+
 class DropdownButtonWidget extends StatefulWidget {
   final List<String> categorias;
 
@@ -203,7 +212,7 @@ class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
           icon: const Icon(Icons.arrow_drop_down),
           iconSize: 24,
           elevation: 16,
-          style: const TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.deepPurple),
           onChanged: (String? newValue) {
             setState(() {
               dropdownValue = newValue!;
@@ -212,7 +221,8 @@ class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
           items: _categorias.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text(value),
+              child:
+                  Text(value, style: TextStyle(color: categoriaCores[value])),
             );
           }).toList(),
         ),
