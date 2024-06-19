@@ -83,60 +83,45 @@ class _ItemsListState extends State<ItemsList> {
         centerTitle: true,
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.only(top: 20),
-        itemCount: _compras.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ListTile(
-              key: Key(_compras[index].nomeProduto),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _compras[index].isChecked,
-                        onChanged: (value) {
-                          setState(() {
-                            _compras[index].isChecked = value ?? false;
-                            _saveCompras();
-                          });
-                        },
-                      ),
-                      const SizedBox(width: 20),
-                      Text(
-                        '${_compras[index].nomeProduto}  -  ${_compras[index].quantidade}x',
-                        style: TextStyle(
-                          decoration: _compras[index].isChecked
-                              ? TextDecoration.lineThrough
-                              : TextDecoration.none,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(' \$ ${_compras[index].preco.toStringAsFixed(2)}'),
-                ],
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                color: Colors.red[900],
-                onPressed: () {
-                  setState(() {
-                    _compras.removeAt(index);
-                    _totalPreco = totalPreco(_compras);
-                    _saveCompras();
-                    widget.updateSomaPrecoLista(_totalPreco);
-                  });
-                },
-              ),
-            ),
-          );
-        },
+  itemCount: _compras.length,
+  itemBuilder: (BuildContext context, int index) {
+    return Dismissible(
+      key: Key(_compras[index].nomeProduto), // Chave única para cada item
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        setState(() {
+          _compras.removeAt(index);
+          _totalPreco = totalPreco(_compras);
+          _saveCompras();
+        });
+      },
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 20.0),
+        child: Icon(Icons.delete, color: Colors.white),
       ),
+      child: Card(
+        child: ListTile(
+          title: Text(_compras[index].nomeProduto),
+          subtitle: Text(
+            'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()}',
+          ),
+          trailing: IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () {
+                    setState(() {
+                      _compras.removeAt(index);
+                      _totalPreco = totalPreco(_compras);
+                      _saveCompras();
+                    });
+                  },
+                ),
+        ),
+      ),
+    );
+  },
+),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xff11e333),
         onPressed: () {
