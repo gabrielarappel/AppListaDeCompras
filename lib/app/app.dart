@@ -10,6 +10,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Lista de compras',
         theme: ThemeData.light(),
-        home: SplashView());
+        home: const SplashView());
   }
 }

@@ -22,25 +22,29 @@ class _SplashViewState extends State<SplashView> {
     });
 
     return Scaffold(
-      body: Stack(children: [
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xff11ee62), Color(0xffd2f8d6)],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              stops: [0.0, 1.0],
+      body: InkWell(
+        child: Stack(children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xff11ee62), Color(0xffd2f8d6)],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                stops: [0.0, 1.0],
+              ),
             ),
           ),
-        ),
-        Center(
-          child: Image.asset(
-            'lib/app/assets/logo_app.png',
-            width: 250,
-            height: 250,
+          Center(
+            child: Image.asset(
+              'lib/app/assets/logo_app.png',
+              width: 250,
+              height: 250,
+            ),
           ),
-        ),
-      ]),
+        ]),
+        onTap: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MainListView())),
+      ),
     );
   }
 }
