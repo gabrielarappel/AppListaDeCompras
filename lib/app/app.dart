@@ -1,4 +1,4 @@
-import 'package:app_lista_de_compras/app/features/main_list.dart';
+import 'package:app_lista_de_compras/app/features/splash.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -10,6 +10,6 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Lista de compras',
         theme: ThemeData.light(),
-        home: MainListView());
+        home: SplashView());
   }
 }

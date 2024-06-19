@@ -1,18 +1,5 @@
+import 'package:app_lista_de_compras/app/features/main_list.dart';
 import 'package:flutter/material.dart';
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Lista de compras',
-      theme: ThemeData(),
-      home: const SplashView(),
-    );
-  }
-}
 
 class SplashView extends StatefulWidget {
   const SplashView({super.key});
@@ -29,9 +16,10 @@ class _SplashViewState extends State<SplashView> {
 
   @override
   Widget build(BuildContext context) {
-    // Future.delayed(const Duration(seconds: 3), () {
-    //   context.pushReplacement('/tela da lista');
-    // });
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const MainListView()));
+    });
 
     return Scaffold(
       body: Stack(children: [
@@ -47,7 +35,7 @@ class _SplashViewState extends State<SplashView> {
         ),
         Center(
           child: Image.asset(
-            'lib/app/assets/logoapp.png',
+            'lib/app/assets/logo_app.png',
             width: 250,
             height: 250,
           ),
