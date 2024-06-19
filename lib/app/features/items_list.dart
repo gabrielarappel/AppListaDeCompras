@@ -5,42 +5,53 @@ class Produto {
   double preco;
   String nomeProduto;
   int quantidade;
+  bool isChecked;
 
-  Produto({this.nomeProduto = '', this.preco = 0.0, this.quantidade = 0});
+  Produto({
+    this.nomeProduto = '',
+    this.preco = 0.0,
+    this.quantidade = 1,
+    this.isChecked = false,
+  });
 }
 
-// ignore: non_constant_identifier_names
-double TotalPreco(List<Produto> produtos) {
+double totalPreco(List<Produto> produtos) {
   double soma = 0;
-
   for (var produto in produtos) {
     soma += produto.preco * produto.quantidade;
   }
   return soma;
 }
 
-class HomePage extends StatefulWidget {
+class ItemsList extends StatefulWidget {
   final String nomeLista;
   final String precoLista;
+  final double somaPrecoLista;
+  final void Function(double) updateSomaPrecoLista; // Função para atualizar _somaPrecoLista em MainListView
 
-  const HomePage(
-      {super.key, required this.nomeLista, required this.precoLista});
+  const ItemsList({
+    Key? key,
+    required this.nomeLista,
+    required this.precoLista,
+    required this.somaPrecoLista,
+    required this.updateSomaPrecoLista,
+  }) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ItemsList> createState() => _ItemsListState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ItemsListState extends State<ItemsList> {
   List<Produto> _compras = [];
   double _totalPreco = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadCompras(); // Carrega os dados ao iniciar a tela
+    _totalPreco = double.parse(widget.precoLista);
+    _loadCompras();
   }
 
-  // Método para carregar os dados salvos
   void _loadCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? produtosSalvos =
@@ -53,14 +64,14 @@ class _HomePageState extends State<HomePage> {
             nomeProduto: dados[0],
             preco: double.parse(dados[1]),
             quantidade: int.parse(dados[2]),
+            isChecked: false,
           );
         }).toList();
-        _totalPreco = TotalPreco(_compras);
+        _totalPreco = totalPreco(_compras);
       });
     }
   }
 
-  // Método para salvar os dados
   void _saveCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> produtosParaSalvar = _compras
@@ -74,7 +85,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFd2f8d6),
       appBar: AppBar(
         backgroundColor: const Color(0xFF11e333),
         title: Text(
@@ -84,34 +94,57 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
       ),
       body: ListView.builder(
+        padding: const EdgeInsets.only(top: 20),
         itemCount: _compras.length,
         itemBuilder: (BuildContext context, int index) {
-          return Dismissible(
-            key: Key(_compras[index].nomeProduto),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          return Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              key: Key(_compras[index].nomeProduto),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _compras[index].isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _compras[index].isChecked = value ?? false;
+                            _totalPreco = totalPreco(_compras);
+                            _saveCompras();
+                            widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 20),
+                      Text(
+                        '${_compras[index].nomeProduto}  -  ${_compras[index].quantidade.toStringAsFixed(0)}x',
+                        style: TextStyle(
+                          decoration: _compras[index].isChecked
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(' \$ ${_compras[index].preco.toStringAsFixed(2)}'),
+                ],
               ),
-              child: ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(_compras[index].nomeProduto),
-                    Text('\$ ${_compras[index].preco.toStringAsFixed(2)}'),
-                    Text(' ${_compras[index].quantidade.toStringAsFixed(0)}'),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  color: Colors.red[900],
-                  onPressed: () {
-                    setState(() {
-                      _compras.removeAt(index);
-                      _totalPreco = TotalPreco(_compras);
-                      _saveCompras(); // Salva os dados após remover um item
-                    });
-                  },
-                ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete),
+                color: Colors.red[900],
+                onPressed: () {
+                  setState(() {
+                    _compras.removeAt(index);
+                    _totalPreco = totalPreco(_compras);
+                    _saveCompras();
+                    widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
+                  });
+                },
               ),
             ),
           );
@@ -123,7 +156,7 @@ class _HomePageState extends State<HomePage> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              Produto novoProduto = Produto(); // Criando um novo produto vazio
+              Produto novoProduto = Produto();
 
               return AlertDialog(
                 shape: RoundedRectangleBorder(
@@ -140,8 +173,7 @@ class _HomePageState extends State<HomePage> {
                         hintText: 'Digite o NOME do produto',
                       ),
                       onChanged: (String value) {
-                        novoProduto.nomeProduto =
-                            value; // Atualiza o nome do produto
+                        novoProduto.nomeProduto = value;
                       },
                     ),
                     const SizedBox(height: 12),
@@ -152,11 +184,10 @@ class _HomePageState extends State<HomePage> {
                           border: OutlineInputBorder(),
                           hintText: 'Digite o PREÇO',
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (String value) {
-                          novoProduto.preco = double.tryParse(value) ??
-                              0.0; // Atualiza o preço do produto
+                          novoProduto.preco = double.tryParse(value) ?? 0.0;
                         },
                       ),
                     ),
@@ -169,8 +200,7 @@ class _HomePageState extends State<HomePage> {
                           hintText: 'Digite a QUANTIDADE',
                         ),
                         onChanged: (String value) {
-                          novoProduto.quantidade = int.tryParse(value) ??
-                              0; // Atualiza a quantidade do produto
+                          novoProduto.quantidade = int.tryParse(value) ?? 0;
                         },
                       ),
                     ),
@@ -180,11 +210,11 @@ class _HomePageState extends State<HomePage> {
                   TextButton(
                     onPressed: () {
                       setState(() {
-                        _compras.add(
-                            novoProduto); // Adiciona o novo produto à lista
-                        _totalPreco = TotalPreco(
-                            _compras); // Atualiza o preço total da lista
-                        _saveCompras(); // Salva os dados após adicionar um item
+                        novoProduto.isChecked = false;
+                        _compras.add(novoProduto);
+                        _totalPreco = totalPreco(_compras);
+                        _saveCompras();
+                        widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
                       });
                       Navigator.of(context).pop();
                     },
