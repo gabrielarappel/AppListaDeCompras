@@ -67,9 +67,7 @@ class AddProductDialog extends StatelessWidget {
           const SizedBox(height: 12),
           const SizedBox(
             width: 180,
-            child: DropdownButtonWidget(
-              categorias: [],
-            ),
+            // removi categorias pq tava dando erro de compilação com meu código
           )
         ],
       ),
