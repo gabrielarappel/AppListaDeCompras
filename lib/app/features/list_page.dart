@@ -14,6 +14,11 @@ class Listas {
   }
 }
 
+
+
+
+
+
 class ListaPage extends StatefulWidget {
   @override
   _ListaPageState createState() => _ListaPageState();
@@ -27,6 +32,44 @@ class _ListaPageState extends State<ListaPage> {
     super.initState();
     _loadListas(); // Carrega as listas salvas ao iniciar a tela
   }
+  void _showDeleteDialog(int index) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Confirmar exclusão'),
+        content: Text('Deseja excluir a lista "${_listas[index].nomeLista}"?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              _deleteLista(index);
+              Navigator.of(context).pop();
+            },
+            child: Text('Sim'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancelar'),
+          ),
+        ],
+      );
+    },
+  );
+}
+void _deleteLista(int index) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  
+  // Remove do SharedPreferences
+  await prefs.remove('precoTotal_${_listas[index].nomeLista}');
+  
+  // Remove da lista em memória
+  setState(() {
+    _listas.removeAt(index);
+    _saveListas(); // Salva as alterações restantes
+  });
+}
 
   void _loadListas() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -66,6 +109,12 @@ class _ListaPageState extends State<ListaPage> {
           return ListTile(
             title: Text(_listas[index].nomeLista),
             subtitle: Text('Preço Total: R\$ ${_listas[index].precoTotal.toStringAsFixed(2)}'),
+            trailing: IconButton(
+    icon: Icon(Icons.delete),
+    onPressed: () {
+      _showDeleteDialog(index);
+    },
+  ),
             onTap: () async {
   bool atualizou = await Navigator.push(
     context,
