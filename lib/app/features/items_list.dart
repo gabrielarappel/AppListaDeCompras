@@ -60,14 +60,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _saveCompras() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> produtosParaSalvar = _compras
-        .map((produto) =>
-            "${produto.nomeProduto}:${produto.preco.toString()}:${produto.quantidade.toString()}")
-        .toList();
-    await prefs.setStringList(
-        'compras_${widget.nomeLista}', produtosParaSalvar);
-  }
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  
+  // Salvar produtos
+  List<String> produtosParaSalvar = _compras
+      .map((produto) =>
+          "${produto.nomeProduto}:${produto.preco.toString()}:${produto.quantidade.toString()}")
+      .toList();
+  await prefs.setStringList('compras_${widget.nomeLista}', produtosParaSalvar);
+
+  // Calcular e salvar o preço total
+  double precoTotal = TotalPreco(_compras);
+  await prefs.setDouble('precoTotal_${widget.nomeLista}', precoTotal);
+}
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true); // Quando retorna a list_page, é enviado um sinal para que a página atualize
           },
         ),
       ),

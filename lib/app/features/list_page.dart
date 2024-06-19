@@ -29,17 +29,23 @@ class _ListaPageState extends State<ListaPage> {
   }
 
   void _loadListas() async {
-    // Carrega as listas salvas do SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> stringListas = prefs.getStringList('listas') ?? [];
-    
-    setState(() {
-      _listas = stringListas.map((item) {
-        List<String> parts = item.split(';'); // Separar nomeLista e precoTotal
-        return Listas(nomeLista: parts[0], precoTotal: double.parse(parts[1]));
-      }).toList();
-    });
-  }
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  List<String> stringListas = prefs.getStringList('listas') ?? [];
+  
+  setState(() {
+    _listas = stringListas.map((item) {
+      List<String> parts = item.split(';');
+      String nomeLista = parts[0];
+      double precoTotal = double.parse(parts[1]);
+
+      // Carregar o preço total salvo para cada lista
+      double? precoTotalSalvo = prefs.getDouble('precoTotal_$nomeLista');
+
+      return Listas(nomeLista: nomeLista, precoTotal: precoTotalSalvo ?? precoTotal);
+    }).toList();
+  });
+}
+
 
   void _saveListas() async {
     // Salva as listas no SharedPreferences
@@ -60,17 +66,22 @@ class _ListaPageState extends State<ListaPage> {
           return ListTile(
             title: Text(_listas[index].nomeLista),
             subtitle: Text('Preço Total: R\$ ${_listas[index].precoTotal.toStringAsFixed(2)}'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomePage(
-                    nomeLista: _listas[index].nomeLista,
-                    precoLista: _listas[index].precoTotal.toStringAsFixed(2),
-                  ),
-                ),
-              );
-            },
+            onTap: () async {
+  bool atualizou = await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => HomePage(
+        nomeLista: _listas[index].nomeLista,
+        precoLista: _listas[index].precoTotal.toStringAsFixed(2),
+      ),
+    ),
+  );
+
+  if (atualizou != null && atualizou) {
+    // Se atualizou for true, recarregar as listas
+    _loadListas();
+  }
+},
           );
         },
       ),
