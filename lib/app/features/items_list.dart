@@ -165,3 +165,58 @@ class _ItemsListState extends State<ItemsList> {
     );
   }
 }
+
+final List<String> _categorias = [
+  'Ferramentas',
+  'Comida',
+  'Eletronicos',
+  'Limpeza',
+  'Jogos',
+  'Bebidas'
+];
+
+class DropdownButtonWidget extends StatefulWidget {
+  final List<String> categorias;
+
+  const DropdownButtonWidget({super.key, required this.categorias});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _DropdownButtonWidgetState createState() => _DropdownButtonWidgetState();
+}
+
+class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
+  String dropdownValue = 'Ferramentas'; // Valor inicial do dropdown
+
+  @override
+  Widget build(BuildContext context) {
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: 'Categorias',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: dropdownValue,
+          icon: const Icon(Icons.arrow_drop_down),
+          iconSize: 24,
+          elevation: 16,
+          style: const TextStyle(color: Colors.black),
+          onChanged: (String? newValue) {
+            setState(() {
+              dropdownValue = newValue!;
+            });
+          },
+          items: _categorias.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}

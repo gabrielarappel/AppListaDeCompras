@@ -1,10 +1,11 @@
+import 'package:app_lista_de_compras/app/features/items_list.dart';
 import 'package:flutter/material.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
 
 class AddProductDialog extends StatelessWidget {
   final void Function(Produto) onAddProduct;
 
-  const AddProductDialog({Key? key, required this.onAddProduct}) : super(key: key);
+  const AddProductDialog({super.key, required this.onAddProduct});
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +43,8 @@ class AddProductDialog extends StatelessWidget {
                     border: OutlineInputBorder(),
                     hintText: 'Preço',
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (String value) {
                     novoProduto.preco = double.tryParse(value) ?? 0.0;
                   },
@@ -64,6 +65,12 @@ class AddProductDialog extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
+          const SizedBox(
+            width: 180,
+            child: DropdownButtonWidget(
+              categorias: [],
+            ),
+          )
         ],
       ),
       actions: [
