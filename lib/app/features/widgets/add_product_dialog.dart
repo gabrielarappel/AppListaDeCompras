@@ -5,8 +5,7 @@ import 'package:app_lista_de_compras/app/features/model/produto.dart';
 class AddProductDialog extends StatelessWidget {
   final void Function(Produto) onAddProduct;
 
-  const AddProductDialog({Key? key, required this.onAddProduct})
-      : super(key: key);
+  const AddProductDialog({super.key, required this.onAddProduct});
 
   @override
   Widget build(BuildContext context) {
