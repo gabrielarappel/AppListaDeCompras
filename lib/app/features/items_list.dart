@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    title: "Lista de compras",
-    theme: ThemeData(
-      brightness: Brightness.light,
-    ),
-    home: const HomePage(),
-  ));
-}
-
 class Produto {
   double preco;
   String nomeProduto;
@@ -20,7 +9,6 @@ class Produto {
   Produto({this.nomeProduto = '', this.preco = 0.0, this.quantidade = 0});
 }
 
-// ignore: non_constant_identifier_names
 double TotalPreco(List<Produto> produtos) {
   double soma = 0;
 
@@ -31,7 +19,11 @@ double TotalPreco(List<Produto> produtos) {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String nomeLista;
+  final String precoLista;
+
+  HomePage({Key? key, required this.nomeLista, required this.precoLista})
+      : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -44,48 +36,49 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadCompras(); // Carrega os dados ao iniciar a tela
+    _loadCompras();
   }
 
-  // Método para carregar os dados salvos
   void _loadCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? produtosSalvos = prefs.getStringList('compras');
+    List<String>? produtosSalvos =
+        prefs.getStringList('compras_${widget.nomeLista}');
     if (produtosSalvos != null) {
       setState(() {
         _compras = produtosSalvos.map((produtoString) {
           List<String> dados = produtoString.split(':');
           return Produto(
-              nomeProduto: dados[0],
-              preco: double.parse(dados[1]),
-              quantidade: int.parse(dados[1]));
+            nomeProduto: dados[0],
+            preco: double.parse(dados[1]),
+            quantidade: int.parse(dados[2]),
+          );
         }).toList();
         _totalPreco = TotalPreco(_compras);
       });
     }
   }
 
-  // Método para salvar os dados
   void _saveCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> produtosParaSalvar = _compras
         .map((produto) =>
             "${produto.nomeProduto}:${produto.preco.toString()}:${produto.quantidade.toString()}")
         .toList();
-    await prefs.setStringList('compras', produtosParaSalvar);
+    await prefs.setStringList(
+        'compras_${widget.nomeLista}', produtosParaSalvar);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFd2f8d6),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF11e333),
-        title: const Text(
-          'Lista de compras',
-          style: TextStyle(color: Colors.white),
+        title: Text(widget.nomeLista),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        centerTitle: true,
       ),
       body: ListView.builder(
         itemCount: _compras.length,
@@ -93,26 +86,18 @@ class _HomePageState extends State<HomePage> {
           return Dismissible(
             key: Key(_compras[index].nomeProduto),
             child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
               child: ListTile(
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(_compras[index].nomeProduto),
-                    Text('\$ ${_compras[index].preco.toStringAsFixed(2)}'),
-                    Text(' ${_compras[index].quantidade.toStringAsFixed(0)}'),
-                  ],
+                title: Text(_compras[index].nomeProduto),
+                subtitle: Text(
+                  'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()}',
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  color: Colors.red,
+                  icon: Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       _compras.removeAt(index);
                       _totalPreco = TotalPreco(_compras);
-                      _saveCompras(); // Salva os dados após remover um item
+                      _saveCompras();
                     });
                   },
                 ),
@@ -122,111 +107,88 @@ class _HomePageState extends State<HomePage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff11e333),
         onPressed: () {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              Produto novoProduto = Produto(); // Criando um novo produto vazio
+              Produto novoProduto = Produto();
 
               return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                title: const Text("Adicione um produto"),
+                title: Text('Adicionar Produto'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const SizedBox(height: 12),
+                  children: [
                     TextField(
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Digite o NOME do produto',
+                      decoration: InputDecoration(
+                        labelText: 'Nome do Produto',
                       ),
-                      onChanged: (String value) {
-                        novoProduto.nomeProduto =
-                            value; // Atualiza o nome do produto
+                      onChanged: (value) {
+                        novoProduto.nomeProduto = value;
                       },
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Digite o PREÇO',
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        onChanged: (String value) {
-                          novoProduto.preco = double.tryParse(value) ??
-                              0.0; // Atualiza o preço do produto
-                        },
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Preço',
                       ),
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (value) {
+                        novoProduto.preco = double.parse(value);
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Digite a QUANTIDADE',
-                        ),
-                        onChanged: (String value) {
-                          novoProduto.quantidade = int.tryParse(value) ??
-                              0; // Atualiza o preço do produto
-                        },
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Quantidade',
                       ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (value) {
+                        novoProduto.quantidade = int.parse(value);
+                      },
                     ),
                   ],
                 ),
                 actions: [
-                  TextButton(
+                  ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        _compras.add(
-                            novoProduto); // Adiciona o novo produto à lista
-                        _totalPreco = TotalPreco(
-                            _compras); // Atualiza o preço total da lista
-                        _saveCompras(); // Salva os dados após adicionar um item
+                        _compras.add(novoProduto);
+                        _totalPreco = TotalPreco(_compras);
+                        _saveCompras();
                       });
                       Navigator.of(context).pop();
                     },
-                    child: const Text('Adicionar'),
-                  )
+                    child: Text('Adicionar'),
+                  ),
                 ],
               );
             },
           );
         },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.add),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.grey[800],
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Total:',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total:',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              'R\$ ${_totalPreco.toStringAsFixed(2)}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+              Text(
+                'R\$ ${_totalPreco.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
