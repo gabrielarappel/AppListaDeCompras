@@ -203,7 +203,7 @@ class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
           icon: const Icon(Icons.arrow_drop_down),
           iconSize: 24,
           elevation: 16,
-          style: const TextStyle(color: Colors.deepPurple),
+          style: const TextStyle(color: Colors.black),
           onChanged: (String? newValue) {
             setState(() {
               dropdownValue = newValue!;
