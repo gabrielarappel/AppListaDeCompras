@@ -65,6 +65,7 @@ class _MainListViewState extends State<MainListView> {
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
+            fontSize: 32
           ),
         ),
         backgroundColor: const Color(0xffD2F8D6),

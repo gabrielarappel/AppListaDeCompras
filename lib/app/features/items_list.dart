@@ -27,15 +27,16 @@ class ItemsList extends StatefulWidget {
   final String nomeLista;
   final String precoLista;
   final double somaPrecoLista;
-  final void Function(double) updateSomaPrecoLista; // Função para atualizar _somaPrecoLista em MainListView
+  final void Function(double)
+      updateSomaPrecoLista; // Função para atualizar _somaPrecoLista em MainListView
 
   const ItemsList({
-    Key? key,
+    super.key,
     required this.nomeLista,
     required this.precoLista,
     required this.somaPrecoLista,
     required this.updateSomaPrecoLista,
-  }) : super(key: key);
+  });
 
   @override
   State<ItemsList> createState() => _ItemsListState();
@@ -116,7 +117,8 @@ class _ItemsListState extends State<ItemsList> {
                             _compras[index].isChecked = value ?? false;
                             _totalPreco = totalPreco(_compras);
                             _saveCompras();
-                            widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
+                            widget.updateSomaPrecoLista(
+                                _totalPreco); // Atualiza o valor em MainListView
                           });
                         },
                       ),
@@ -142,7 +144,8 @@ class _ItemsListState extends State<ItemsList> {
                     _compras.removeAt(index);
                     _totalPreco = totalPreco(_compras);
                     _saveCompras();
-                    widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
+                    widget.updateSomaPrecoLista(
+                        _totalPreco); // Atualiza o valor em MainListView
                   });
                 },
               ),
@@ -166,60 +169,86 @@ class _ItemsListState extends State<ItemsList> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    const SizedBox(height: 12),
+                    const SizedBox(
+                      height: 12,
+                      width: 400,
+                    ),
                     TextField(
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        hintText: 'Digite o NOME do produto',
+                        hintText: 'Nome do produto',
                       ),
                       onChanged: (String value) {
                         novoProduto.nomeProduto = value;
                       },
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Digite o PREÇO',
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: 180,
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Preço',
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            onChanged: (String value) {
+                              novoProduto.preco = double.tryParse(value) ?? 0.0;
+                            },
+                          ),
                         ),
-                        keyboardType:
-                            const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: (String value) {
-                          novoProduto.preco = double.tryParse(value) ?? 0.0;
-                        },
-                      ),
+                        SizedBox(
+                          width: 180,
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Quantidade',
+                            ),
+                            onChanged: (String value) {
+                              novoProduto.quantidade = int.tryParse(value) ?? 0;
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: 200,
-                      child: TextField(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Digite a QUANTIDADE',
-                        ),
-                        onChanged: (String value) {
-                          novoProduto.quantidade = int.tryParse(value) ?? 0;
-                        },
-                      ),
-                    ),
                   ],
                 ),
                 actions: [
-                  TextButton(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            "Cancelar",
+                            style: TextStyle(color: Colors.red[900]),
+                          )),
+                          TextButton(
                     onPressed: () {
                       setState(() {
                         novoProduto.isChecked = false;
                         _compras.add(novoProduto);
                         _totalPreco = totalPreco(_compras);
                         _saveCompras();
-                        widget.updateSomaPrecoLista(_totalPreco); // Atualiza o valor em MainListView
+                        widget.updateSomaPrecoLista(
+                            _totalPreco); // Atualiza o valor em MainListView
                       });
                       Navigator.of(context).pop();
                     },
-                    child: const Text('Adicionar'),
-                  )
+                    child: const Text(
+                      'Adicionar',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                    ],
+                  ),
+                  
                 ],
               );
             },
