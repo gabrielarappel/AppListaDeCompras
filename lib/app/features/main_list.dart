@@ -162,7 +162,7 @@ class _MainListViewState extends State<MainListView> {
                             ),
                             trailing: IconButton(
                               icon: Icon(
-                                Icons.delete_forever_outlined,
+                                Icons.delete,
                                 color: Colors.red[900],
                                 size: 35,
                               ),
