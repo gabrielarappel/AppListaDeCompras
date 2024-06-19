@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'items_list.dart';
-import 'add_list_dialog.dart'; // Import the dialog
+import 'widgets/add_list_dialog.dart'; // Import the dialog
 
 class MainListView extends StatefulWidget {
   const MainListView({super.key});
@@ -87,9 +87,9 @@ class _MainListViewState extends State<MainListView> {
       backgroundColor: const Color(0xFFD2F8D6),
       appBar: AppBar(
         title: const Text(
-          "Listas",
+          "Minhas Listas",
           style: TextStyle(
-              color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 32),
+              color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 32,),
         ),
         backgroundColor: const Color(0xffD2F8D6),
       ),
