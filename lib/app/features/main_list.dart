@@ -55,6 +55,11 @@ class _MainListViewState extends State<MainListView> {
     prefs.setStringList('listasDeCompras', listasDeComprasString);
   }
 
+  Future<void> _deleteLista(String nomeLista) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('compras_$nomeLista'); // Remove the associated purchases
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,139 +68,125 @@ class _MainListViewState extends State<MainListView> {
         title: const Text(
           "Listas",
           style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 32
-          ),
+              color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 32),
         ),
         backgroundColor: const Color(0xffD2F8D6),
       ),
-      body: Stack(
-        children: [
-          ListView.builder(
-            itemCount: _listasDeCompras.length,
-            itemBuilder: (context, index) {
-              return Column(
-                children: [
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    key: Key(_listasDeCompras[index].toString()),
-                    child: FractionallySizedBox(
-                      widthFactor: 0.9,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 0,
-                              blurRadius: 8,
-                              offset: const Offset(
-                                0,
-                                2,
-                              ),
-                            ),
-                          ],
+      body: ListView.builder(
+        itemCount: _listasDeCompras.length,
+        itemBuilder: (context, index) {
+          return Column(
+            children: [
+              const SizedBox(
+                height: 30,
+              ),
+              Center(
+                key: Key(_listasDeCompras[index].toString()),
+                child: FractionallySizedBox(
+                  widthFactor: 0.9,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 0,
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        child: ListTile(
-                          title: Text(
-                            "Lista ${index + 1}",
-                            style: const TextStyle(
-                              color: Colors.black87,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _formatDate(DateTime.now()),
-                                style: const TextStyle(
-                                  color: Colors.black26,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const Divider(),
-                              Text(
-                                '\$ ${_listasDeCompras[index]['preco'].toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(
-                              Icons.delete_forever_outlined,
-                              color: Colors.red[900],
-                              size: 35,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _listasDeCompras.removeAt(index);
-                                _saveListasDeCompras();
-                                _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao remover uma lista
-                              });
-                            },
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ItemsList(
-                                  nomeLista: _listasDeCompras[index]['nome'],
-                                  precoLista: _listasDeCompras[index]['preco']
-                                      .toString(),
-                                  somaPrecoLista: _somaPrecoLista,
-                                  updateSomaPrecoLista: (double novoTotal) {
-                                    setState(() {
-                                      _listasDeCompras[index]['preco'] =
-                                          novoTotal;
-                                      _saveListasDeCompras();
-                                      _updateSomaPrecoLista();
-                                    });
-                                  },
-                                ),
-                              ),
-                            );
-                          },
+                      ],
+                    ),
+                    child: ListTile(
+                      title: Text(
+                        "Lista ${index + 1}",
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _formatDate(DateTime.now()),
+                            style: const TextStyle(
+                              color: Colors.black26,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Divider(),
+                          Text(
+                            '\$ ${_listasDeCompras[index]['preco'].toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.black87,
+                              fontSize: 18
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.delete_forever_outlined,
+                          color: Colors.red[900],
+                          size: 35,
+                        ),
+                        onPressed: () async {
+                          await _deleteLista(_listasDeCompras[index]['nome']);
+                          setState(() {
+                            _listasDeCompras.removeAt(index);
+                            _saveListasDeCompras();
+                            _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao remover uma lista
+                          });
+                        },
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ItemsList(
+                              nomeLista: _listasDeCompras[index]['nome'],
+                              precoLista:
+                                  _listasDeCompras[index]['preco'].toString(),
+                              somaPrecoLista: _somaPrecoLista,
+                              updateSomaPrecoLista: (double novoTotal) {
+                                setState(() {
+                                  _listasDeCompras[index]['preco'] = novoTotal;
+                                  _saveListasDeCompras();
+                                  _updateSomaPrecoLista();
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ],
-              );
-            },
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
-              backgroundColor: const Color(0xFF11E333),
-              shape: const CircleBorder(),
-              onPressed: () {
-                setState(() {
-                  _listasDeCompras.add({
-                    'nome': 'Lista ${_listasDeCompras.length + 1}',
-                    'preco': 0.0,
-                  });
-                  _saveListasDeCompras();
-                  _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
-                });
-              },
-              child: const Icon(
-                Icons.add,
-                size: 40,
-                color: Colors.white,
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF11E333),
+        shape: const CircleBorder(),
+        onPressed: () {
+          setState(() {
+            _listasDeCompras.add({
+              'nome': 'Lista ${_listasDeCompras.length + 1}',
+              'preco': 0.0,
+            });
+            _saveListasDeCompras();
+            _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
+          });
+        },
+        child: const Icon(
+          Icons.add,
+          size: 40,
+          color: Colors.white,
+        ),
       ),
     );
   }
