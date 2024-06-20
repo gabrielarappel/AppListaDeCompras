@@ -1,16 +1,30 @@
-# app_lista_de_compras
+# App Lista de Compras
 
-A new Flutter project.
+Este é um aplicativo simples e intuitivo para criar e gerenciar listas de compras. Com ele, você pode:
 
-## Getting Started
+- **Criar e Nomear Listas**: Organize suas compras criando listas com nomes personalizados.
+- **Gerenciar Itens**: Adicione, edite ou exclua itens de suas listas. Cada item pode ter uma quantidade, valor e categoria associados.
+- **Marcar Produtos Adquiridos**: Marque os produtos que já foram colocados no carrinho para facilitar o acompanhamento das compras.
+- **Cálculo Automático do Valor Total**: O aplicativo calcula automaticamente o valor total de cada lista, ajudando você a manter o controle dos gastos.
 
-This project is a starting point for a Flutter application.
+## Instruções para Compilar e Executar o Projeto
 
-A few resources to get you started if this is your first Flutter project:
+1. Abra o projeto na sua IDE de preferência.
+2. Selecione o Chrome como o dispositivo de execução.
+3. Clique em "Run" para iniciar o aplicativo.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Navegação do Aplicativo
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Splash Screen**: Após carregar, o aplicativo exibirá uma página de splash.
+- **Tela Principal das Listas**: A splash screen dará lugar à tela principal, onde você pode visualizar e gerenciar suas listas de compras.
+- **Criar Nova Lista**:
+  - Clique no botão no canto inferior direito para criar sua primeira lista.
+  - Dê um nome à sua lista e clique nela para abri-la.
+- **Adicionar Produtos**: Dentro da lista, você poderá adicionar os produtos que deseja, especificando quantidade, valor e categoria.
+
+## Lista de membros da equipe
+
+- Álvaro Davi Araújo de Souza
+- Emiliano José G. de Almeida Calado
+- Gabriela Fraga Rappel
+- Lucas Moreno dos Santos Oitabem
