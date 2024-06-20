@@ -23,6 +23,7 @@ class ItemsList extends StatefulWidget {
     required this.nomeLista,
     required this.precoLista,
     required this.somaPrecoLista,
+    
     required this.updateSomaPrecoLista,
   }) : super(key: key);
 
@@ -53,7 +54,8 @@ class _ItemsListState extends State<ItemsList> {
             nomeProduto: dados[0],
             preco: double.parse(dados[1]),
             quantidade: int.parse(dados[2]),
-            isChecked: dados[3] == 'true',
+            categoria: dados[4],
+            isChecked: dados[4] == 'true',
           );
         }).toList();
         _totalPreco = totalPreco(_compras);
@@ -65,7 +67,7 @@ class _ItemsListState extends State<ItemsList> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> produtosParaSalvar = _compras
         .map((produto) =>
-            "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.isChecked}")
+            "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.categoria}:${produto.isChecked}")
         .toList();
     await prefs.setStringList(
         'compras_${widget.nomeLista}', produtosParaSalvar);
@@ -106,8 +108,9 @@ class _ItemsListState extends State<ItemsList> {
               child: ListTile(
                 title: Text(_compras[index].nomeProduto),
                 subtitle: Text(
-                  'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()}',
+                  'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()} | Categoria: ${_compras[index].categoria}',
                 ),
+                
                 trailing: IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () {
@@ -149,72 +152,6 @@ class _ItemsListState extends State<ItemsList> {
         ),
       ),
       bottomNavigationBar: BottomTotalPrice(totalPreco: _totalPreco),
-    );
-  }
-}
-final List<String> _categorias = [
-  'Adicione categoria',
-  'Ferramentas',
-  'Comida',
-  'Eletronicos',
-  'Limpeza',
-  'Jogos',
-  'Bebidas'
-];
-
-final Map<String, Color> categoriaCores = {
-  'Adicione categoria':Colors.black,
-  'Ferramentas': Colors.blue,
-  'Comida': Colors.red,
-  'Eletronicos': Colors.green,
-  'Limpeza': Colors.orange,
-  'Jogos': Colors.purple,
-  'Bebidas': Colors.brown,
-};
-
-class DropdownButtonWidget extends StatefulWidget {
-  final List<String> categorias;
-
-  const DropdownButtonWidget({super.key, required this.categorias});
-
-  @override
-  // ignore: library_private_types_in_public_api
-  _DropdownButtonWidgetState createState() => _DropdownButtonWidgetState();
-}
-
-class _DropdownButtonWidgetState extends State<DropdownButtonWidget> {
-  String dropdownValue = 'Adicione categoria'; // Valor inicial do dropdown
-
-  @override
-  Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: 'Categorias',
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: dropdownValue,
-          icon: const Icon(Icons.arrow_drop_down),
-          iconSize: 24,
-          elevation: 16,
-          style: const TextStyle(color: Colors.deepPurple),
-          onChanged: (String? newValue) {
-            setState(() {
-              dropdownValue = newValue!;
-            });
-          },
-          items: _categorias.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child:
-                  Text(value, style: TextStyle(color: categoriaCores[value])),
-            );
-          }).toList(),
-        ),
-      ),
     );
   }
 }
