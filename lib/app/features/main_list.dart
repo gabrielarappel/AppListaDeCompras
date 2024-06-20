@@ -72,6 +72,7 @@ class _MainListViewState extends State<MainListView> {
               _listasDeCompras.add({
                 'nome': nomeLista,
                 'preco': 0.0,
+                
               });
               _saveListasDeCompras();
               _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
@@ -181,7 +182,7 @@ class _MainListViewState extends State<MainListView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ItemsList(
-                                    nomeLista: _listasDeCompras[index]['nome'],
+                                    nomeLista: _listasDeCompras[index]['nome'],  
                                     precoLista: _listasDeCompras[index]['preco']
                                         .toString(),
                                     somaPrecoLista: _somaPrecoLista,
