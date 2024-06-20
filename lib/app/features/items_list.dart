@@ -54,7 +54,7 @@ class _ItemsListState extends State<ItemsList> {
             nomeProduto: dados[0],
             preco: double.parse(dados[1]),
             quantidade: int.parse(dados[2]),
-            categoria: dados[4],
+            categoria: dados[3],
             isChecked: dados[4] == 'true',
           );
         }).toList();
