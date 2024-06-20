@@ -3,7 +3,7 @@
 Este é um aplicativo simples e intuitivo para criar e gerenciar listas de compras. Com ele, você pode:
 
 - **Criar e Nomear Listas**: Organize suas compras criando listas com nomes personalizados.
-- **Gerenciar Itens**: Adicione, edite ou exclua itens de suas listas. Cada item pode ter uma quantidade, valor e categoria associados.
+- **Gerenciar Itens**: Adicione ou exclua itens de suas listas. Cada item pode ter uma quantidade, valor e categoria associados.
 - **Marcar Produtos Adquiridos**: Marque os produtos que já foram colocados no carrinho para facilitar o acompanhamento das compras.
 - **Cálculo Automático do Valor Total**: O aplicativo calcula automaticamente o valor total de cada lista, ajudando você a manter o controle dos gastos.
 
