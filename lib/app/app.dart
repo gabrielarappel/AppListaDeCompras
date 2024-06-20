@@ -1,4 +1,4 @@
-import 'package:app_lista_de_compras/app/features/splash.dart';
+import 'package:app_lista_de_compras/app/features/pages/splash.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
