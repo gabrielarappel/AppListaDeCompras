@@ -62,15 +62,21 @@ class AddProductDialog extends StatelessWidget {
                   },
                 ),
               ),
+              
             ],
           ),
           const SizedBox(height: 12),
-          const SizedBox(
-            width: 180,
-            child: DropdownButtonWidget(
-              categorias: [],
+          TextField(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Categoria',
             ),
-          )
+            onChanged: (String value) {
+              novoProduto.categoria = value;
+            },
+          ),
+          const SizedBox(height: 12),
+          
         ],
       ),
       actions: [
