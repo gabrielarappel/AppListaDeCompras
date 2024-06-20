@@ -17,7 +17,7 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.push(context,
+      Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => const MainListView()));
     });
 
@@ -42,7 +42,7 @@ class _SplashViewState extends State<SplashView> {
             ),
           ),
         ]),
-        onTap: () => Navigator.push(context,
+        onTap: () => Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const MainListView())),
       ),
     );
