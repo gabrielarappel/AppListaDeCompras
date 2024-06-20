@@ -1,16 +1,21 @@
-import 'package:app_lista_de_compras/app/features/items_list.dart';
 import 'package:flutter/material.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
 
-class AddProductDialog extends StatelessWidget {
+class AddProductDialog extends StatefulWidget {
   final void Function(Produto) onAddProduct;
 
   const AddProductDialog({super.key, required this.onAddProduct});
 
   @override
-  Widget build(BuildContext context) {
-    Produto novoProduto = Produto();
+  AddProductDialogState createState() => AddProductDialogState();
+}
 
+class AddProductDialogState extends State<AddProductDialog> {
+  Produto novoProduto = Produto();
+  String? _errorText;
+
+  @override
+  Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -24,12 +29,16 @@ class AddProductDialog extends StatelessWidget {
             width: 400,
           ),
           TextField(
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
               hintText: 'Nome do produto',
+              errorText: _errorText,
             ),
             onChanged: (String value) {
-              novoProduto.nomeProduto = value;
+              setState(() {
+                novoProduto.nomeProduto = value;
+                _errorText = null;
+              });
             },
           ),
           const SizedBox(height: 12),
@@ -43,8 +52,7 @@ class AddProductDialog extends StatelessWidget {
                     border: OutlineInputBorder(),
                     hintText: 'Preço',
                   ),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (String value) {
                     novoProduto.preco = double.tryParse(value) ?? 0.0;
                   },
@@ -62,7 +70,6 @@ class AddProductDialog extends StatelessWidget {
                   },
                 ),
               ),
-              
             ],
           ),
           const SizedBox(height: 12),
@@ -76,7 +83,6 @@ class AddProductDialog extends StatelessWidget {
             },
           ),
           const SizedBox(height: 12),
-          
         ],
       ),
       actions: [
@@ -94,9 +100,15 @@ class AddProductDialog extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                novoProduto.isChecked = false;
-                onAddProduct(novoProduto);
-                Navigator.of(context).pop();
+                if (novoProduto.nomeProduto.isEmpty) {
+                  setState(() {
+                    _errorText = 'O nome do produto não pode estar vazio';
+                  });
+                } else {
+                  novoProduto.isChecked = false;
+                  widget.onAddProduct(novoProduto);
+                  Navigator.of(context).pop();
+                }
               },
               child: const Text(
                 'Adicionar',
@@ -109,4 +121,3 @@ class AddProductDialog extends StatelessWidget {
     );
   }
 }
-// TODO Implement this library.

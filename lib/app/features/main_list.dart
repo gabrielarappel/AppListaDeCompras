@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'items_list.dart';
 import 'widgets/add_list_dialog.dart'; // Import the dialog
 
 class MainListView extends StatefulWidget {
-  const MainListView({Key? key});
+  const MainListView({super.key});
 
   @override
   State<MainListView> createState() => _MainListViewState();
@@ -13,6 +14,7 @@ class MainListView extends StatefulWidget {
 class _MainListViewState extends State<MainListView> {
   final List<Map<String, dynamic>> _listasDeCompras = [];
   double _somaPrecoLista = 0.0;
+  final Uuid _uuid = const Uuid();
 
   @override
   void initState() {
@@ -22,16 +24,16 @@ class _MainListViewState extends State<MainListView> {
 
   Future<void> _loadListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? listasDeComprasString =
-        prefs.getStringList('listasDeCompras');
+    final List<String>? listasDeComprasString = prefs.getStringList('listasDeCompras');
     if (listasDeComprasString != null) {
       setState(() {
         _listasDeCompras.clear(); // Limpa a lista atual antes de adicionar novos itens
         _listasDeCompras.addAll(listasDeComprasString.map((item) {
           final parts = item.split(';');
           return {
-            'nome': parts[0],
-            'preco': double.parse(parts[1]),
+            'id': parts[0],
+            'nome': parts[1],
+            'preco': double.parse(parts[2]),
           };
         }).toList());
         _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao carregar as listas de compras
@@ -52,14 +54,14 @@ class _MainListViewState extends State<MainListView> {
   Future<void> _saveListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> listasDeComprasString = _listasDeCompras.map((item) {
-      return '${item['nome']};${item['preco']}';
+      return '${item['id']};${item['nome']};${item['preco']}';
     }).toList();
     prefs.setStringList('listasDeCompras', listasDeComprasString);
   }
 
-  Future<void> _deleteLista(String nomeLista) async {
+  Future<void> _deleteLista(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('compras_$nomeLista'); // Remove the associated purchases
+    await prefs.remove('compras_$id'); // Remove the associated purchases
   }
 
   void _showAddListDialog() {
@@ -69,10 +71,11 @@ class _MainListViewState extends State<MainListView> {
         return AddListDialog(
           onAdd: (nomeLista) {
             setState(() {
+              String id = _uuid.v4();
               _listasDeCompras.add({
+                'id': id,
                 'nome': nomeLista,
                 'preco': 0.0,
-                
               });
               _saveListasDeCompras();
               _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
@@ -114,7 +117,7 @@ class _MainListViewState extends State<MainListView> {
                       height: 30,
                     ),
                     Center(
-                      key: Key(_listasDeCompras[index].toString()),
+                      key: Key(_listasDeCompras[index]['id'].toString()), // Use the unique ID as the key
                       child: FractionallySizedBox(
                         widthFactor: 0.9,
                         child: Container(
@@ -168,8 +171,7 @@ class _MainListViewState extends State<MainListView> {
                                 size: 35,
                               ),
                               onPressed: () async {
-                                await _deleteLista(
-                                    _listasDeCompras[index]['nome']);
+                                await _deleteLista(_listasDeCompras[index]['id']);
                                 setState(() {
                                   _listasDeCompras.removeAt(index);
                                   _saveListasDeCompras();
@@ -182,7 +184,8 @@ class _MainListViewState extends State<MainListView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ItemsList(
-                                    nomeLista: _listasDeCompras[index]['nome'],  
+                                    idLista: _listasDeCompras[index]['id'],  // Pass the unique ID
+                                    nomeLista: _listasDeCompras[index]['nome'],
                                     precoLista: _listasDeCompras[index]['preco']
                                         .toString(),
                                     somaPrecoLista: _somaPrecoLista,

@@ -13,19 +13,20 @@ double totalPreco(List<Produto> produtos) {
 }
 
 class ItemsList extends StatefulWidget {
+  final String idLista;
   final String nomeLista;
   final String precoLista;
   final double somaPrecoLista;
   final void Function(double) updateSomaPrecoLista;
 
   const ItemsList({
-    Key? key,
+    super.key,
+    required this.idLista,
     required this.nomeLista,
     required this.precoLista,
     required this.somaPrecoLista,
-    
     required this.updateSomaPrecoLista,
-  }) : super(key: key);
+  });
 
   @override
   State<ItemsList> createState() => _ItemsListState();
@@ -44,8 +45,7 @@ class _ItemsListState extends State<ItemsList> {
 
   void _loadCompras() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? produtosSalvos =
-        prefs.getStringList('compras_${widget.nomeLista}');
+    List<String>? produtosSalvos = prefs.getStringList('compras_${widget.idLista}');
     if (produtosSalvos != null) {
       setState(() {
         _compras = produtosSalvos.map((produtoString) {
@@ -69,8 +69,7 @@ class _ItemsListState extends State<ItemsList> {
         .map((produto) =>
             "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.categoria}:${produto.isChecked}")
         .toList();
-    await prefs.setStringList(
-        'compras_${widget.nomeLista}', produtosParaSalvar);
+    await prefs.setStringList('compras_${widget.idLista}', produtosParaSalvar);
   }
 
   @override
@@ -101,18 +100,41 @@ class _ItemsListState extends State<ItemsList> {
             background: Container(
               color: Colors.red,
               alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 20.0),
-              child: Icon(Icons.delete, color: Colors.white),
+              padding: const EdgeInsets.only(right: 20.0),
+              child: const Icon(Icons.delete, color: Colors.white),
             ),
             child: Card(
               child: ListTile(
-                title: Text(_compras[index].nomeProduto),
-                subtitle: Text(
-                  'Preço: \$${_compras[index].preco.toStringAsFixed(2)} | Quantidade: ${_compras[index].quantidade.toString()} | Categoria: ${_compras[index].categoria}',
+                title: Row(
+                  children: [
+                    Checkbox(
+                      value: _compras[index].isChecked,
+                      onChanged: (value) {
+                        setState(() {
+                          _compras[index].isChecked = value ?? false;
+                          _saveCompras();
+                        });
+                      },
+                    ),
+                    Text(
+                      _compras[index].nomeProduto,
+                      style: TextStyle(
+                        decoration: _compras[index].isChecked
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                  ],
                 ),
-                
+                subtitle: Row(
+                  children: [
+                    Text("Preço: \$${_compras[index].preco.toStringAsFixed(2)} | "),
+                    Text("Quantidade: ${_compras[index].quantidade.toString()} | "),
+                    Text("Categoria: ${_compras[index].categoria}"),
+                  ],
+                ),
                 trailing: IconButton(
-                  icon: Icon(Icons.delete),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       _compras.removeAt(index);
