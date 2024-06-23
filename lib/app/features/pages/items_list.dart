@@ -109,6 +109,7 @@ class _ItemsListState extends State<ItemsList> {
                   children: [
                     Checkbox(
                       value: _compras[index].isChecked,
+                      activeColor: Colors.green,
                       onChanged: (value) {
                         setState(() {
                           _compras[index].isChecked = value ?? false;
