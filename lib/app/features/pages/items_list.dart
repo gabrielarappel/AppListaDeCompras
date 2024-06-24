@@ -86,6 +86,12 @@ class _ItemsListState extends State<ItemsList> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF11e333),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         title: Text(
           widget.nomeLista,
           style: const TextStyle(color: Colors.white),
