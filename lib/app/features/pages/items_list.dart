@@ -72,11 +72,26 @@ class _ItemsListState extends State<ItemsList> {
     await prefs.setStringList('compras_${widget.idLista}', produtosParaSalvar);
   }
 
+   void _removeProduto(int index) {
+    setState(() {
+      _compras.removeAt(index);
+      _totalPreco = totalPreco(_compras);
+      _saveCompras();
+      widget.updateSomaPrecoLista(_totalPreco);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF11e333),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         title: Text(
           widget.nomeLista,
           style: const TextStyle(color: Colors.white),
@@ -90,12 +105,7 @@ class _ItemsListState extends State<ItemsList> {
             key: Key(_compras[index].nomeProduto), // Chave única para cada item
             direction: DismissDirection.endToStart,
             onDismissed: (direction) {
-              setState(() {
-                _compras.removeAt(index);
-                _totalPreco = totalPreco(_compras);
-                _saveCompras();
-                widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
-              });
+              _removeProduto(index);
             },
             background: Container(
               color: Colors.red,
@@ -137,12 +147,7 @@ class _ItemsListState extends State<ItemsList> {
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    setState(() {
-                      _compras.removeAt(index);
-                      _totalPreco = totalPreco(_compras);
-                      _saveCompras();
-                      widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
-                    });
+                    _removeProduto(index);
                   },
                 ),
               ),
