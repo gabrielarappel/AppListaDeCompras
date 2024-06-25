@@ -12,7 +12,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('iBuy'),
-        backgroundColor: const Color(0xFFD2F8D6),
+        backgroundColor: Color.fromARGB(255, 88, 156, 95),
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black87),
       ),

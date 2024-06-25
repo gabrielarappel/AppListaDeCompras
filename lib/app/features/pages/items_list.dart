@@ -85,7 +85,7 @@ class _ItemsListState extends State<ItemsList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF11e333),
+        backgroundColor: const Color.fromARGB(255, 88, 156, 95),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

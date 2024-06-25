@@ -9,23 +9,23 @@ class CreateUserPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Criar Novo Usuário'),
+      title: const Text('Criar Novo Usuário'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           TextField(
             controller: _usernameController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               prefixIcon: Icon(Icons.person),
               labelText: 'Nome de Usuário',
               border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           TextField(
             controller: _passwordController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               prefixIcon: Icon(Icons.lock),
               labelText: 'Senha',
               border: OutlineInputBorder(),
@@ -61,8 +61,8 @@ class CreateUserPopup extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    title: Text('Erro ao Criar Usuário'),
-                    content: Text('Este nome de usuário já está em uso.'),
+                    title: const Text('Erro ao Criar Usuário'),
+                    content: const Text('Este nome de usuário já está em uso.'),
                     actions: <Widget>[
                       TextButton(
                         child: Text('OK'),
