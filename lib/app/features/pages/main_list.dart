@@ -106,7 +106,7 @@ class _MainListViewState extends State<MainListView> {
             fontSize: 32,
           ),
         ),
-        backgroundColor: const Color(0xffD2F8D6),
+        backgroundColor: Color.fromARGB(255, 88, 156, 95),
       ),
       body: _listasDeCompras.isEmpty
           ? const Center(
