@@ -13,17 +13,22 @@ class CreateUserPopup extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          SizedBox(height: 20.0),
           TextField(
             controller: _usernameController,
             decoration: InputDecoration(
+              prefixIcon: Icon(Icons.person),
               labelText: 'Nome de Usuário',
+              border: OutlineInputBorder(),
             ),
           ),
-          SizedBox(height: 10.0),
+          SizedBox(height: 20.0),
           TextField(
             controller: _passwordController,
             decoration: InputDecoration(
+              prefixIcon: Icon(Icons.lock),
               labelText: 'Senha',
+              border: OutlineInputBorder(),
             ),
             obscureText: true,
           ),
@@ -32,12 +37,18 @@ class CreateUserPopup extends StatelessWidget {
       actions: <Widget>[
         TextButton(
           child: Text('Cancelar'),
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+          ),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         ElevatedButton(
           child: Text('Criar'),
+          style: ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+          ),
           onPressed: () async {
             String username = _usernameController.text;
             String password = _passwordController.text;
