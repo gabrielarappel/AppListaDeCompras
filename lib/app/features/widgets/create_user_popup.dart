@@ -38,7 +38,7 @@ class CreateUserPopup extends StatelessWidget {
         TextButton(
           child: Text('Cancelar'),
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+            foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
           ),
           onPressed: () {
             Navigator.of(context).pop();
@@ -47,7 +47,7 @@ class CreateUserPopup extends StatelessWidget {
         ElevatedButton(
           child: Text('Criar'),
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+            foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
           ),
           onPressed: () async {
             String username = _usernameController.text;
@@ -68,7 +68,7 @@ class CreateUserPopup extends StatelessWidget {
                         child: Text('OK'),
                         style: ButtonStyle(
                           foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.black),
+                              WidgetStateProperty.all<Color>(Colors.black),
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
