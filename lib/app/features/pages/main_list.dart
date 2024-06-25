@@ -2,17 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'items_list.dart';
-import '../widgets/add_list_dialog.dart'; // Import the dialog
+import '../widgets/add_list_dialog.dart';
+import 'user_manager.dart'; // Importar UserManager para adicionar lista de compras
+
+class ListaDeCompra {
+  String id;
+  String nome;
+  double preco;
+
+  ListaDeCompra({
+    required this.id,
+    required this.nome,
+    required this.preco,
+  });
+
+  ListaDeCompra.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        nome = json['nome'],
+        preco = json['preco'];
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'nome': nome,
+        'preco': preco,
+      };
+}
 
 class MainListView extends StatefulWidget {
-  const MainListView({super.key});
+  final String username;
+
+  const MainListView({Key? key, required this.username}) : super(key: key);
 
   @override
   State<MainListView> createState() => _MainListViewState();
 }
 
 class _MainListViewState extends State<MainListView> {
-  final List<Map<String, dynamic>> _listasDeCompras = [];
+  final List<ListaDeCompra> _listasDeCompras = [];
   double _somaPrecoLista = 0.0;
   final Uuid _uuid = const Uuid();
 
@@ -24,19 +50,20 @@ class _MainListViewState extends State<MainListView> {
 
   Future<void> _loadListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? listasDeComprasString = prefs.getStringList('listasDeCompras');
+    final List<String>? listasDeComprasString =
+        prefs.getStringList('listasDeCompras_${widget.username}');
     if (listasDeComprasString != null) {
       setState(() {
-        _listasDeCompras.clear(); // Limpa a lista atual antes de adicionar novos itens
+        _listasDeCompras.clear();
         _listasDeCompras.addAll(listasDeComprasString.map((item) {
           final parts = item.split(';');
-          return {
-            'id': parts[0],
-            'nome': parts[1],
-            'preco': double.parse(parts[2]),
-          };
+          return ListaDeCompra(
+            id: parts[0],
+            nome: parts[1],
+            preco: double.parse(parts[2]),
+          );
         }).toList());
-        _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao carregar as listas de compras
+        _updateSomaPrecoLista();
       });
     }
   }
@@ -44,7 +71,7 @@ class _MainListViewState extends State<MainListView> {
   void _updateSomaPrecoLista() {
     double total = 0;
     for (var lista in _listasDeCompras) {
-      total += lista['preco'];
+      total += lista.preco;
     }
     setState(() {
       _somaPrecoLista = total;
@@ -53,15 +80,17 @@ class _MainListViewState extends State<MainListView> {
 
   Future<void> _saveListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String> listasDeComprasString = _listasDeCompras.map((item) {
-      return '${item['id']};${item['nome']};${item['preco']}';
-    }).toList();
-    prefs.setStringList('listasDeCompras', listasDeComprasString);
+    final List<String> listasDeComprasString =
+        _listasDeCompras.map((item) => '${item.id};${item.nome};${item.preco}').toList();
+    prefs.setStringList('listasDeCompras_${widget.username}', listasDeComprasString);
   }
 
   Future<void> _deleteLista(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('compras_$id'); // Remove the associated purchases
+    setState(() {
+      _listasDeCompras.removeWhere((lista) => lista.id == id);
+      _saveListasDeCompras();
+      _updateSomaPrecoLista();
+    });
   }
 
   void _showAddListDialog() {
@@ -69,17 +98,16 @@ class _MainListViewState extends State<MainListView> {
       context: context,
       builder: (context) {
         return AddListDialog(
-          onAdd: (nomeLista) {
-            setState(() {
-              String id = _uuid.v4();
-              _listasDeCompras.add({
-                'id': id,
-                'nome': nomeLista,
-                'preco': 0.0,
-              });
-              _saveListasDeCompras();
-              _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao adicionar uma lista
-            });
+          onAdd: (nomeLista) async {
+            String id = _uuid.v4();
+            _listasDeCompras.add(ListaDeCompra(
+              id: id,
+              nome: nomeLista,
+              preco: 0.0,
+            ));
+            await UserManager.addListaDeCompras(widget.username, id); // Adiciona lista ao usuário
+            _saveListasDeCompras();
+            _updateSomaPrecoLista();
           },
         );
       },
@@ -117,7 +145,7 @@ class _MainListViewState extends State<MainListView> {
                       height: 30,
                     ),
                     Center(
-                      key: Key(_listasDeCompras[index]['id'].toString()), // Use the unique ID as the key
+                      key: Key(_listasDeCompras[index].id),
                       child: FractionallySizedBox(
                         widthFactor: 0.9,
                         child: Container(
@@ -135,9 +163,9 @@ class _MainListViewState extends State<MainListView> {
                           ),
                           child: ListTile(
                             title: Text(
-                              _listasDeCompras[index]['nome'].isEmpty
+                              _listasDeCompras[index].nome.isEmpty
                                   ? "Lista ${index + 1}"
-                                  : _listasDeCompras[index]['nome'],
+                                  : _listasDeCompras[index].nome,
                               style: const TextStyle(
                                 color: Colors.black87,
                                 fontSize: 32,
@@ -156,7 +184,7 @@ class _MainListViewState extends State<MainListView> {
                                 ),
                                 const Divider(),
                                 Text(
-                                  '\$ ${_listasDeCompras[index]['preco'].toStringAsFixed(2)}',
+                                  '\$ ${_listasDeCompras[index].preco.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     color: Colors.black87,
                                     fontSize: 18,
@@ -165,18 +193,13 @@ class _MainListViewState extends State<MainListView> {
                               ],
                             ),
                             trailing: IconButton(
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.delete,
-                                color: Colors.red[900],
+                                color: Colors.red,
                                 size: 35,
                               ),
                               onPressed: () async {
-                                await _deleteLista(_listasDeCompras[index]['id']);
-                                setState(() {
-                                  _listasDeCompras.removeAt(index);
-                                  _saveListasDeCompras();
-                                  _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao remover uma lista
-                                });
+                                await _deleteLista(_listasDeCompras[index].id);
                               },
                             ),
                             onTap: () async {
@@ -184,15 +207,13 @@ class _MainListViewState extends State<MainListView> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ItemsList(
-                                    idLista: _listasDeCompras[index]['id'],  // Pass the unique ID
-                                    nomeLista: _listasDeCompras[index]['nome'],
-                                    precoLista: _listasDeCompras[index]['preco']
-                                        .toString(),
+                                    idLista: _listasDeCompras[index].id,
+                                    nomeLista: _listasDeCompras[index].nome,
+                                    precoLista: _listasDeCompras[index].preco.toString(),
                                     somaPrecoLista: _somaPrecoLista,
                                     updateSomaPrecoLista: (double novoTotal) {
                                       setState(() {
-                                        _listasDeCompras[index]['preco'] =
-                                            novoTotal;
+                                        _listasDeCompras[index].preco = novoTotal;
                                         _saveListasDeCompras();
                                         _updateSomaPrecoLista();
                                       });
@@ -200,7 +221,7 @@ class _MainListViewState extends State<MainListView> {
                                   ),
                                 ),
                               );
-                              _updateSomaPrecoLista(); // Atualiza _somaPrecoLista ao retornar de ItemsList
+                              _updateSomaPrecoLista();
                             },
                           ),
                         ),

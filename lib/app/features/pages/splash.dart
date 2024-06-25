@@ -1,4 +1,4 @@
-import 'package:app_lista_de_compras/app/features/pages/main_list.dart';
+import 'package:app_lista_de_compras/app/features/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 class SplashView extends StatefulWidget {
@@ -18,7 +18,7 @@ class _SplashViewState extends State<SplashView> {
   Widget build(BuildContext context) {
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => const MainListView()));
+          MaterialPageRoute(builder: (context) => LoginPage()));
     });
 
     return Scaffold(
@@ -43,7 +43,7 @@ class _SplashViewState extends State<SplashView> {
           ),
         ]),
         onTap: () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const MainListView())),
+            MaterialPageRoute(builder: (context) => LoginPage())),
       ),
     );
   }
