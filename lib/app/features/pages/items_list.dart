@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
 import 'package:app_lista_de_compras/app/features/widgets/bottom_total_price.dart';
-import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart'; // Importe o novo widget
+import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart'; 
 
 double totalPreco(List<Produto> produtos) {
   double soma = 0;

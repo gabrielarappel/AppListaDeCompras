@@ -53,14 +53,50 @@ class CreateUserPopup extends StatelessWidget {
             String username = _usernameController.text;
             String password = _passwordController.text;
 
-            // Salvar novo usuário usando SharedPreferences
-            await _saveUser(username, password);
+            // Verificar se o usuário já existe
+            bool userExists = await _checkIfUserExists(username);
 
-            Navigator.of(context).pop(); // Fechar o popup após criar usuário
+            if (userExists) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Erro ao Criar Usuário'),
+                    content: Text('Este nome de usuário já está em uso.'),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('OK'),
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.black),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            } else {
+              // Salvar novo usuário usando SharedPreferences
+              await _saveUser(username, password);
+              Navigator.of(context).pop(); // Fechar o popup após criar usuário
+            }
           },
         ),
       ],
     );
+  }
+
+  // Método para verificar se o usuário já existe
+  Future<bool> _checkIfUserExists(String username) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> usersMap = prefs.getString('users') != null
+        ? jsonDecode(prefs.getString('users')!)
+        : {};
+
+    return usersMap.containsKey(username);
   }
 
   // Método para salvar novo usuário usando SharedPreferences
