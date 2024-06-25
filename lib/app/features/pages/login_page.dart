@@ -116,7 +116,7 @@ class LoginPage extends StatelessWidget {
                     );
                   },
                   child: Text(
-                    'Criar Novo Usuário',
+                    '  Cadastre-se  ',
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
