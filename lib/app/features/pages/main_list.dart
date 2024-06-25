@@ -3,8 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'items_list.dart';
 import '../widgets/add_list_dialog.dart';
+import 'user_manager.dart'; // Importar UserManager para adicionar lista de compras
 
-// Modelo para representar uma lista de compras
 class ListaDeCompra {
   String id;
   String nome;
@@ -29,7 +29,9 @@ class ListaDeCompra {
 }
 
 class MainListView extends StatefulWidget {
-  const MainListView({Key? key}) : super(key: key);
+  final String username;
+
+  const MainListView({Key? key, required this.username}) : super(key: key);
 
   @override
   State<MainListView> createState() => _MainListViewState();
@@ -48,7 +50,8 @@ class _MainListViewState extends State<MainListView> {
 
   Future<void> _loadListasDeCompras() async {
     final prefs = await SharedPreferences.getInstance();
-    final List<String>? listasDeComprasString = prefs.getStringList('listasDeCompras');
+    final List<String>? listasDeComprasString =
+        prefs.getStringList('listasDeCompras_${widget.username}');
     if (listasDeComprasString != null) {
       setState(() {
         _listasDeCompras.clear();
@@ -79,7 +82,7 @@ class _MainListViewState extends State<MainListView> {
     final prefs = await SharedPreferences.getInstance();
     final List<String> listasDeComprasString =
         _listasDeCompras.map((item) => '${item.id};${item.nome};${item.preco}').toList();
-    prefs.setStringList('listasDeCompras', listasDeComprasString);
+    prefs.setStringList('listasDeCompras_${widget.username}', listasDeComprasString);
   }
 
   Future<void> _deleteLista(String id) async {
@@ -95,17 +98,16 @@ class _MainListViewState extends State<MainListView> {
       context: context,
       builder: (context) {
         return AddListDialog(
-          onAdd: (nomeLista) {
-            setState(() {
-              String id = _uuid.v4();
-              _listasDeCompras.add(ListaDeCompra(
-                id: id,
-                nome: nomeLista,
-                preco: 0.0,
-              ));
-              _saveListasDeCompras();
-              _updateSomaPrecoLista();
-            });
+          onAdd: (nomeLista) async {
+            String id = _uuid.v4();
+            _listasDeCompras.add(ListaDeCompra(
+              id: id,
+              nome: nomeLista,
+              preco: 0.0,
+            ));
+            await UserManager.addListaDeCompras(widget.username, id); // Adiciona lista ao usuário
+            _saveListasDeCompras();
+            _updateSomaPrecoLista();
           },
         );
       },
@@ -143,7 +145,7 @@ class _MainListViewState extends State<MainListView> {
                       height: 30,
                     ),
                     Center(
-                      key: Key(_listasDeCompras[index].id), // Use the unique ID as the key
+                      key: Key(_listasDeCompras[index].id),
                       child: FractionallySizedBox(
                         widthFactor: 0.9,
                         child: Container(
