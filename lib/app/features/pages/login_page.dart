@@ -98,7 +98,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Login',
+                    'Entrar',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
                 ),
