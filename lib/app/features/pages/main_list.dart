@@ -5,7 +5,7 @@ import 'package:app_lista_de_compras/app/features/model/produto.dart'; // Import
 import 'package:app_lista_de_compras/app/features/pages/items_list.dart';
 import 'package:app_lista_de_compras/app/features/widgets/add_list_dialog.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:uuid/uuid.dart';
 
 import 'user_manager.dart';
