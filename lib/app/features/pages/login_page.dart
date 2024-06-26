@@ -36,7 +36,7 @@ class LoginPage extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: 400),
                   child: TextField(
                     controller: _usernameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Usuário',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.person),
@@ -48,7 +48,7 @@ class LoginPage extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: 400),
                   child: TextField(
                     controller: _passwordController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Senha',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
@@ -100,7 +100,7 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30.0),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Entrar',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
@@ -115,7 +115,7 @@ class LoginPage extends StatelessWidget {
                       },
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     '  Cadastre-se  ',
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),

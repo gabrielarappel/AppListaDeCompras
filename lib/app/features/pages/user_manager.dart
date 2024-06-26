@@ -1,30 +1,20 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_lista_de_compras/app/features/model/usuario.dart';
 
 class UserManager {
-  static const String _userKey = 'users';
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _collection = 'users';
 
   // Método para registrar um novo usuário
   static Future<void> registerUser(Usuario user) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString(_userKey) != null
-        ? jsonDecode(prefs.getString(_userKey)!)
-        : {};
-
-    usersMap[user.username] = user.toJson();
-    await prefs.setString(_userKey, jsonEncode(usersMap));
+    await _firestore.collection(_collection).doc(user.username).set(user.toJson());
   }
 
   // Método para verificar se as credenciais de login estão corretas
   static Future<bool> loginUser(String username, String password) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString(_userKey) != null
-        ? jsonDecode(prefs.getString(_userKey)!)
-        : {};
-
-    if (usersMap.containsKey(username)) {
-      Map<String, dynamic> userData = usersMap[username];
+    DocumentSnapshot doc = await _firestore.collection(_collection).doc(username).get();
+    if (doc.exists) {
+      Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
       return userData['password'] == password;
     }
     return false;
@@ -32,34 +22,24 @@ class UserManager {
 
   // Método para obter informações de um usuário
   static Future<Usuario?> getUser(String username) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString(_userKey) != null
-        ? jsonDecode(prefs.getString(_userKey)!)
-        : {};
-
-    if (usersMap.containsKey(username)) {
-      Map<String, dynamic> userData = usersMap[username];
-      return Usuario.fromJson(userData);
+    DocumentSnapshot doc = await _firestore.collection(_collection).doc(username).get();
+    if (doc.exists) {
+      return Usuario.fromJson(doc.data() as Map<String, dynamic>);
     }
     return null;
   }
 
   // Método para adicionar uma nova lista de compras ao usuário
   static Future<void> addListaDeCompras(String username, String listaId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString(_userKey) != null
-        ? jsonDecode(prefs.getString(_userKey)!)
-        : {};
+    DocumentReference userDoc = _firestore.collection(_collection).doc(username);
+    DocumentSnapshot doc = await userDoc.get();
 
-    if (usersMap.containsKey(username)) {
-      Map<String, dynamic> userData = usersMap[username];
-      List<String> listasDeCompras =
-          List<String>.from(userData['listasDeCompras'] ?? []);
+    if (doc.exists) {
+      Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+      List<String> listasDeCompras = List<String>.from(userData['listasDeCompras'] ?? []);
       if (!listasDeCompras.contains(listaId)) {
         listasDeCompras.add(listaId);
-        userData['listasDeCompras'] = listasDeCompras;
-        usersMap[username] = userData;
-        await prefs.setString(_userKey, jsonEncode(usersMap));
+        await userDoc.update({'listasDeCompras': listasDeCompras});
       }
     }
   }

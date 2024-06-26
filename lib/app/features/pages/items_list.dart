@@ -1,185 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
+import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart';
 import 'package:app_lista_de_compras/app/features/widgets/bottom_total_price.dart';
-import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart'; 
 
-double totalPreco(List<Produto> produtos) {
-  double soma = 0;
-  for (var produto in produtos) {
-    soma += produto.preco * produto.quantidade;
-  }
-  return soma;
-}
+class ItemsListPage extends StatefulWidget {
+  final String listaId;
 
-class ItemsList extends StatefulWidget {
-  final String idLista;
-  final String nomeLista;
-  final String precoLista;
-  final double somaPrecoLista;
-  final void Function(double) updateSomaPrecoLista;
-
-  const ItemsList({
-    super.key,
-    required this.idLista,
-    required this.nomeLista,
-    required this.precoLista,
-    required this.somaPrecoLista,
-    required this.updateSomaPrecoLista,
-  });
+  const ItemsListPage({Key? key, required this.listaId}) : super(key: key);
 
   @override
-  State<ItemsList> createState() => _ItemsListState();
+  _ItemsListPageState createState() => _ItemsListPageState();
 }
 
-class _ItemsListState extends State<ItemsList> {
-  List<Produto> _compras = [];
-  double _totalPreco = 0;
+class _ItemsListPageState extends State<ItemsListPage> {
+  late CollectionReference _listasCollection;
+  late CollectionReference _produtosCollection;
 
   @override
   void initState() {
     super.initState();
-    _totalPreco = double.parse(widget.precoLista);
-    _loadCompras();
+    _listasCollection = FirebaseFirestore.instance.collection('listasDeCompras');
+    _produtosCollection = _listasCollection.doc(widget.listaId).collection('produtos');
   }
 
-  void _loadCompras() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? produtosSalvos = prefs.getStringList('compras_${widget.idLista}');
-    if (produtosSalvos != null) {
-      setState(() {
-        _compras = produtosSalvos.map((produtoString) {
-          List<String> dados = produtoString.split(':');
-          return Produto(
-            nomeProduto: dados[0],
-            preco: double.parse(dados[1]),
-            quantidade: int.parse(dados[2]),
-            categoria: dados[3],
-            isChecked: dados[4] == 'true',
-          );
-        }).toList();
-        _totalPreco = totalPreco(_compras);
-      });
-    }
+  void _addProduto(Produto produto) async {
+    await _produtosCollection.add(produto.toJson());
+    _updateTotalPreco();
   }
 
-  void _saveCompras() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> produtosParaSalvar = _compras
-        .map((produto) =>
-            "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.categoria}:${produto.isChecked}")
-        .toList();
-    await prefs.setStringList('compras_${widget.idLista}', produtosParaSalvar);
-  }
+  void _updateTotalPreco() async {
+    QuerySnapshot querySnapshot = await _produtosCollection.get();
+    double totalPreco = querySnapshot.docs
+        .map((doc) => Produto.fromJson(doc.data() as Map<String, dynamic>).preco)
+        .fold(0.0, (previous, current) => previous + current);
 
-   void _removeProduto(int index) {
-    setState(() {
-      _compras.removeAt(index);
-      _totalPreco = totalPreco(_compras);
-      _saveCompras();
-      widget.updateSomaPrecoLista(_totalPreco);
-    });
+    await _listasCollection.doc(widget.listaId).update({'preco': totalPreco});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 88, 156, 95),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Text(
-          widget.nomeLista,
-          style: const TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
+        title: const Text('Produtos'),
       ),
-      body: ListView.builder(
-        itemCount: _compras.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Dismissible(
-            key: Key(_compras[index].nomeProduto), // Chave única para cada item
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) {
-              _removeProduto(index);
-            },
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20.0),
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            child: Card(
-              child: ListTile(
-                title: Row(
-                  children: [
-                    Checkbox(
-                      value: _compras[index].isChecked,
-                      activeColor: Colors.green,
-                      onChanged: (value) {
-                        setState(() {
-                          _compras[index].isChecked = value ?? false;
-                          _saveCompras();
-                        });
-                      },
-                    ),
-                    Text(
-                      _compras[index].nomeProduto,
-                      style: TextStyle(
-                        decoration: _compras[index].isChecked
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-                subtitle: Row(
-                  children: [
-                    Text("Preço: \$${_compras[index].preco.toStringAsFixed(2)} | "),
-                    Text("Quantidade: ${_compras[index].quantidade.toString()} | "),
-                    Text("Categoria: ${_compras[index].categoria}"),
-                  ],
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    _removeProduto(index);
-                  },
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _produtosCollection.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao carregar produtos'));
+          }
+
+          double totalPreco = snapshot.data!.docs
+              .map((doc) => Produto.fromJson(doc.data() as Map<String, dynamic>).preco)
+              .fold(0.0, (previous, current) => previous + current);
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  children: snapshot.data!.docs.map((doc) {
+                    Produto produto = Produto.fromJson(doc.data() as Map<String, dynamic>);
+                    return ListTile(
+                      title: Text(produto.nomeProduto),
+                      subtitle: Text('R\$ ${produto.preco.toStringAsFixed(2)}'),
+                      trailing: Text('Qtd: ${produto.quantidade}'),
+                    );
+                  }).toList(),
                 ),
               ),
-            ),
+              BottomTotalPrice(totalPreco: totalPreco),
+            ],
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xff11e333),
         onPressed: () {
           showDialog(
             context: context,
-            builder: (BuildContext context) {
-              return AddProductDialog(
-                onAddProduct: (Produto novoProduto) {
-                  setState(() {
-                    _compras.add(novoProduto);
-                    _totalPreco = totalPreco(_compras);
-                    _saveCompras();
-                    widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
-                  });
-                },
-              );
+            builder: (context) {
+              return AddProductDialog(onAddProduct: _addProduto);
             },
           );
         },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomTotalPrice(totalPreco: _totalPreco),
     );
   }
 }
