@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class CreateUserPopup extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -37,7 +40,7 @@ class CreateUserPopup extends StatelessWidget {
         TextButton(
           child: Text('Cancelar'),
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+            foregroundColor: WidgetStateProperty.all<Color>(Colors.red),
           ),
           onPressed: () {
             Navigator.of(context).pop();
@@ -46,7 +49,7 @@ class CreateUserPopup extends StatelessWidget {
         ElevatedButton(
           child: Text('Criar'),
           style: ButtonStyle(
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+            foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
           ),
           onPressed: () async {
             String username = _usernameController.text;
@@ -66,7 +69,8 @@ class CreateUserPopup extends StatelessWidget {
                       TextButton(
                         child: Text('OK'),
                         style: ButtonStyle(
-                          foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                          foregroundColor:
+                              WidgetStateProperty.all<Color>(Colors.black),
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -77,7 +81,7 @@ class CreateUserPopup extends StatelessWidget {
                 },
               );
             } else {
-              // Salvar novo usuário usando Firestore
+              // Salvar novo usuário usando SharedPreferences
               await _saveUser(username, password);
               Navigator.of(context).pop(); // Fechar o popup após criar usuário
             }
@@ -89,16 +93,21 @@ class CreateUserPopup extends StatelessWidget {
 
   // Método para verificar se o usuário já existe
   Future<bool> _checkIfUserExists(String username) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(username).get();
-    return doc.exists;
-  }
+  final docSnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(username)
+      .get();
 
-  // Método para salvar novo usuário usando Firestore
-  Future<void> _saveUser(String username, String password) async {
-    await FirebaseFirestore.instance.collection('users').doc(username).set({
-      'username': username,
-      'password': password,
-      'listasDeCompras': [],
-    });
-  }
+  return docSnapshot.exists;
+}
+
+Future<void> _saveUser(String username, String password) async {
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(username)
+      .set({
+    'username': username,
+    'password': password,
+  });
+}
 }

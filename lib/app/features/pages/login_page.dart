@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'main_list.dart';
 import 'user_manager.dart';
 
+
 class LoginPage extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -11,10 +12,7 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Image.asset(
-                  'assets/images/logoibuy.png',
-                  height: 60,
-                ),
+        title: Text('iBuy'),
         backgroundColor: Color.fromARGB(255, 88, 156, 95),
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black87),
@@ -36,7 +34,7 @@ class LoginPage extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: 400),
                   child: TextField(
                     controller: _usernameController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Usuário',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.person),
@@ -48,7 +46,7 @@ class LoginPage extends StatelessWidget {
                   constraints: BoxConstraints(maxWidth: 400),
                   child: TextField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Senha',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.lock),
@@ -100,7 +98,7 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30.0),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Entrar',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
@@ -115,8 +113,8 @@ class LoginPage extends StatelessWidget {
                       },
                     );
                   },
-                  child: const Text(
-                    '  Cadastre-se  ',
+                  child: Text(
+                    'Criar Novo Usuário',
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
