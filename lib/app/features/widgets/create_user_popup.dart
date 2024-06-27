@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class CreateUserPopup extends StatelessWidget {
   final TextEditingController _usernameController = TextEditingController();
@@ -91,26 +91,21 @@ class CreateUserPopup extends StatelessWidget {
 
   // Método para verificar se o usuário já existe
   Future<bool> _checkIfUserExists(String username) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString('users') != null
-        ? jsonDecode(prefs.getString('users')!)
-        : {};
+  final docSnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(username)
+      .get();
 
-    return usersMap.containsKey(username);
-  }
+  return docSnapshot.exists;
+}
 
-  // Método para salvar novo usuário usando SharedPreferences
-  Future<void> _saveUser(String username, String password) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map<String, dynamic> usersMap = prefs.getString('users') != null
-        ? jsonDecode(prefs.getString('users')!)
-        : {};
-
-    usersMap[username] = {
-      'username': username,
-      'password': password,
-    };
-
-    await prefs.setString('users', jsonEncode(usersMap));
-  }
+Future<void> _saveUser(String username, String password) async {
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(username)
+      .set({
+    'username': username,
+    'password': password,
+  });
+}
 }

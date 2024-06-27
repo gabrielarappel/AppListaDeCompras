@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
+import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart';
 import 'package:app_lista_de_compras/app/features/widgets/bottom_total_price.dart';
-import 'package:app_lista_de_compras/app/features/widgets/add_product_dialog.dart'; 
 
 double totalPreco(List<Produto> produtos) {
   double soma = 0;
@@ -44,18 +44,23 @@ class _ItemsListState extends State<ItemsList> {
   }
 
   void _loadCompras() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? produtosSalvos = prefs.getStringList('compras_${widget.idLista}');
-    if (produtosSalvos != null) {
+    final docSnapshot = await FirebaseFirestore.instance
+        .collection('produtos_salvar')
+        .doc(widget.idLista)
+        .get();
+
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      final produtosList = data['produtos'] as List<dynamic>;
+
       setState(() {
-        _compras = produtosSalvos.map((produtoString) {
-          List<String> dados = produtoString.split(':');
+        _compras = produtosList.map((produtoMap) {
           return Produto(
-            nomeProduto: dados[0],
-            preco: double.parse(dados[1]),
-            quantidade: int.parse(dados[2]),
-            categoria: dados[3],
-            isChecked: dados[4] == 'true',
+            nomeProduto: produtoMap['nomeProduto'],
+            preco: produtoMap['preco'],
+            quantidade: produtoMap['quantidade'],
+            categoria: produtoMap['categoria'],
+            isChecked: produtoMap['isChecked'],
           );
         }).toList();
         _totalPreco = totalPreco(_compras);
@@ -64,15 +69,25 @@ class _ItemsListState extends State<ItemsList> {
   }
 
   void _saveCompras() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> produtosParaSalvar = _compras
-        .map((produto) =>
-            "${produto.nomeProduto}:${produto.preco}:${produto.quantidade}:${produto.categoria}:${produto.isChecked}")
-        .toList();
-    await prefs.setStringList('compras_${widget.idLista}', produtosParaSalvar);
+    final produtosParaSalvar = _compras.map((produto) {
+      return {
+        'nomeProduto': produto.nomeProduto,
+        'preco': produto.preco,
+        'quantidade': produto.quantidade,
+        'categoria': produto.categoria,
+        'isChecked': produto.isChecked,
+      };
+    }).toList();
+
+    await FirebaseFirestore.instance
+        .collection('produtos_salvar')
+        .doc(widget.idLista)
+        .set({
+          'produtos': produtosParaSalvar,
+        });
   }
 
-   void _removeProduto(int index) {
+  void _removeProduto(int index) {
     setState(() {
       _compras.removeAt(index);
       _totalPreco = totalPreco(_compras);
