@@ -29,6 +29,5 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(MyApp());
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-firestore.collection("Só para testar") .doc("Estou testando").set({"funcionou": true,});
+ 
 }
