@@ -1,6 +1,6 @@
 # App Lista de Compras
-https://lista-de-compras-app-ad9fe.web.app/
-<a href=“https://lista-de-compras-app-ad9fe.web.app/“>AppListaDeComprasWeb</a>
+
+[AppListaDeComprasWeb](https://lista-de-compras-app-ad9fe.web.app/)
 
 Este é um aplicativo simples e intuitivo para criar e gerenciar listas de compras. Com ele, você pode:
 
