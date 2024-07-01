@@ -96,6 +96,25 @@ class _ItemsListState extends State<ItemsList> {
     });
   }
 
+  void _editProduto(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AddProductDialog(
+          initialProduto: _compras[index],
+          onAddProduct: (Produto produtoEditado) {
+            setState(() {
+              _compras[index] = produtoEditado;
+              _totalPreco = totalPreco(_compras);
+              _saveCompras();
+              widget.updateSomaPrecoLista(_totalPreco); // Atualiza o preço total na MainListView
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,11 +178,22 @@ class _ItemsListState extends State<ItemsList> {
                     Text("Categoria: ${_compras[index].categoria}"),
                   ],
                 ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    _removeProduto(index);
-                  },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        _editProduto(index);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _removeProduto(index);
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),

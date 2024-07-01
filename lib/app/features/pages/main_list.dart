@@ -5,7 +5,6 @@ import 'package:app_lista_de_compras/app/features/model/produto.dart'; // Import
 import 'package:app_lista_de_compras/app/features/pages/items_list.dart';
 import 'package:app_lista_de_compras/app/features/widgets/add_list_dialog.dart';
 
-
 import 'package:uuid/uuid.dart';
 
 import 'user_manager.dart';
@@ -22,13 +21,13 @@ class MainListView extends StatefulWidget {
 class _MainListViewState extends State<MainListView> {
   final List<ListaDeCompra> _listasDeCompras = [];
   double _somaPrecoLista = 0.0;
-  bool _isLoading = false; // Adicionei uma flag de carregamento
+  bool _isLoading = false;
   final Uuid _uuid = const Uuid();
 
   @override
   void initState() {
     super.initState();
-    _isLoading = true; // Inicia o estado de carregamento
+    _isLoading = true; 
     _loadListasDeCompras();
   }
 
@@ -155,6 +154,24 @@ class _MainListViewState extends State<MainListView> {
     );
   }
 
+  void _showEditListDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AddListDialog(
+          dialogTitle: 'Editar Nome da Lista',
+          initialText: _listasDeCompras[index].nome,
+          onAdd: (newName) {
+            setState(() {
+              _listasDeCompras[index].nome = newName;
+              _saveListasDeCompras();
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,15 +225,30 @@ class _MainListViewState extends State<MainListView> {
                                 ],
                               ),
                               child: ListTile(
-                                title: Text(
-                                  _listasDeCompras[index].nome.isEmpty
-                                      ? "Lista ${index + 1}"
-                                      : _listasDeCompras[index].nome,
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _listasDeCompras[index].nome.isEmpty
+                                          ? "Lista ${index + 1}"
+                                          : _listasDeCompras[index].nome,
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        
+                                        size: 30,
+                                      ),
+                                      onPressed: () {
+                                        _showEditListDialog(index);
+                                      },
+                                    ),
+                                  ],
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
