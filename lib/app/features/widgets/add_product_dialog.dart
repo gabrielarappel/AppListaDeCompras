@@ -71,13 +71,15 @@ class AddProductDialogState extends State<AddProductDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
-                width: 90,
+                width: 110,
                 child: TextField(
                   controller: _precoController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Preço', // Legendas adicionadas aqui
-                    hintText: 'Informe o preço',
+                    labelText: 'Preço',
+                    labelStyle: TextStyle(fontSize: 12), 
+                     
+                    hintText: 'Preço',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (String value) {
@@ -91,8 +93,9 @@ class AddProductDialogState extends State<AddProductDialog> {
                   controller: _quantidadeController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Quantidade', // Legendas adicionadas aqui
-                    hintText: 'Informe a quantidade',
+                    labelText: 'Quantidade', 
+                    labelStyle: TextStyle(fontSize: 12), 
+                    hintText: 'quantidade',
                   ),
                   onChanged: (String value) {
                     _produto.quantidade = int.tryParse(value) ?? 1;

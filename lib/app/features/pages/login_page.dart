@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 Image.asset(
                   'lib/app/assets/logo_app.png',
-                  height: 200,
+                  height: 300,
                 ),
                 const SizedBox(height: 30.0),
                 Container(
