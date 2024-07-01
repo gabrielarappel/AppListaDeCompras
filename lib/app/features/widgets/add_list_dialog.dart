@@ -3,13 +3,22 @@ import 'package:flutter/material.dart';
 class AddListDialog extends StatelessWidget {
   final TextEditingController _textFieldController = TextEditingController();
   final Function(String) onAdd;
+  final String dialogTitle;
+  final String initialText;
 
-  AddListDialog({super.key, required this.onAdd});
+  AddListDialog({
+    super.key,
+    required this.onAdd,
+    this.dialogTitle = 'Adicionar Nova Lista',
+    this.initialText = '',
+  }) {
+    _textFieldController.text = initialText;
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Adicionar Nova Lista'),
+      title: Text(dialogTitle),
       content: TextField(
         controller: _textFieldController,
         decoration: const InputDecoration(hintText: "Nome da lista"),
@@ -25,8 +34,8 @@ class AddListDialog extends StatelessWidget {
               },
             ),
             TextButton(
-              child: const Text('Adicionar',
-                  style: TextStyle(color: Colors.black)),
+              child: Text(dialogTitle.contains('Adicionar') ? 'Adicionar' : 'Salvar',
+                  style: const TextStyle(color: Colors.black)),
               onPressed: () {
                 final String nomeLista = _textFieldController.text;
                 onAdd(nomeLista);
