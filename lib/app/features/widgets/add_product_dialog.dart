@@ -5,7 +5,7 @@ class AddProductDialog extends StatefulWidget {
   final void Function(Produto) onAddProduct;
   final Produto? initialProduto;
 
-  const AddProductDialog({super.key, required this.onAddProduct, this.initialProduto});
+  const AddProductDialog({Key? key, required this.onAddProduct, this.initialProduto}) : super(key: key);
 
   @override
   AddProductDialogState createState() => AddProductDialogState();
@@ -14,11 +14,31 @@ class AddProductDialog extends StatefulWidget {
 class AddProductDialogState extends State<AddProductDialog> {
   late Produto _produto;
   String? _errorText;
+  late TextEditingController _nomeController;
+  late TextEditingController _precoController;
+  late TextEditingController _quantidadeController;
+  late TextEditingController _categoriaController;
 
   @override
   void initState() {
     super.initState();
     _produto = widget.initialProduto ?? Produto();
+
+    // Initialize controllers
+    _nomeController = TextEditingController(text: _produto.nomeProduto);
+    _precoController = TextEditingController(text: _produto.preco.toString());
+    _quantidadeController = TextEditingController(text: _produto.quantidade.toString());
+    _categoriaController = TextEditingController(text: _produto.categoria);
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers
+    _nomeController.dispose();
+    _precoController.dispose();
+    _quantidadeController.dispose();
+    _categoriaController.dispose();
+    super.dispose();
   }
 
   @override
@@ -31,12 +51,9 @@ class AddProductDialogState extends State<AddProductDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
-            height: 12,
-            width: 400,
-          ),
+          const SizedBox(height: 12),
           TextField(
-            controller: TextEditingController(text: _produto.nomeProduto),
+            controller: _nomeController,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               hintText: 'Nome do produto',
@@ -54,12 +71,13 @@ class AddProductDialogState extends State<AddProductDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
-                width: 180,
+                width: 90,
                 child: TextField(
-                  controller: TextEditingController(text: _produto.preco.toString()),
+                  controller: _precoController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Preço',
+                    labelText: 'Preço', // Legendas adicionadas aqui
+                    hintText: 'Informe o preço',
                   ),
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (String value) {
@@ -68,12 +86,13 @@ class AddProductDialogState extends State<AddProductDialog> {
                 ),
               ),
               SizedBox(
-                width: 180,
+                width: 90,
                 child: TextField(
-                  controller: TextEditingController(text: _produto.quantidade.toString()),
+                  controller: _quantidadeController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Quantidade',
+                    labelText: 'Quantidade', // Legendas adicionadas aqui
+                    hintText: 'Informe a quantidade',
                   ),
                   onChanged: (String value) {
                     _produto.quantidade = int.tryParse(value) ?? 1;
@@ -84,7 +103,7 @@ class AddProductDialogState extends State<AddProductDialog> {
           ),
           const SizedBox(height: 12),
           TextField(
-            controller: TextEditingController(text: _produto.categoria),
+            controller: _categoriaController,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               hintText: 'Categoria',
