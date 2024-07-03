@@ -4,9 +4,9 @@ import 'package:app_lista_de_compras/app/features/model/listadecompra.dart';
 import 'package:app_lista_de_compras/app/features/model/produto.dart';
 import 'package:app_lista_de_compras/app/features/pages/items_list.dart';
 import 'package:app_lista_de_compras/app/features/widgets/add_list_dialog.dart';
+import 'package:app_lista_de_compras/app/features/widgets/remove_list_dialog.dart';
 import 'package:uuid/uuid.dart';
 import 'package:app_lista_de_compras/app/features/pages/login_page.dart';
-import 'package:app_lista_de_compras/app/features/widgets/remove_list_dialog.dart'; // Importa o dialog de remoção
 
 class MainListView extends StatefulWidget {
   final String username;
@@ -22,7 +22,7 @@ class _MainListViewState extends State<MainListView> {
   double _somaPrecoLista = 0.0;
   bool _isLoading = false;
   final Uuid _uuid = const Uuid();
-  int _currentIndex = 0;
+  int _currentIndex = 1; // Alterado para iniciar na aba de listas
 
   @override
   void initState() {
@@ -109,30 +109,19 @@ class _MainListViewState extends State<MainListView> {
     await batch.commit();
   }
 
-  Future<void> _deleteLista(String id) async {
+  void _deleteLista(String id) async {
     try {
-      // Mostra o diálogo de confirmação
-      showDialog(
-        context: context,
-        builder: (context) => RemoveListDialog(
-          listName: _listasDeCompras.firstWhere((lista) => lista.id == id).nome,
-          onConfirm: () async {
-            // Remove localmente
-            setState(() {
-              _listasDeCompras.removeWhere((lista) => lista.id == id);
-              _updateSomaPrecoLista();
-            });
+      // Remove localmente
+      setState(() {
+        _listasDeCompras.removeWhere((lista) => lista.id == id);
+        _updateSomaPrecoLista();
+      });
 
-            // Remove no Firestore
-            await FirebaseFirestore.instance
-                .collection('listas_de_compras')
-                .doc(id)
-                .delete();
-
-            Navigator.of(context).pop(); // Fecha o diálogo de confirmação
-          },
-        ),
-      );
+      // Remove no Firestore
+      await FirebaseFirestore.instance
+          .collection('listas_de_compras')
+          .doc(id)
+          .delete();
     } catch (e) {
       print('Erro ao excluir lista: $e');
       // Se ocorrer um erro, reverta as alterações locais
@@ -196,6 +185,13 @@ class _MainListViewState extends State<MainListView> {
         ),
         backgroundColor: Color.fromARGB(255, 88, 156, 95),
         actions: [
+          IconButton(
+            icon: Icon(Icons.notifications), // Ícone de notificação
+            onPressed: () {
+              // Implemente a lógica de notificação aqui
+              // Exemplo: Mostrar uma lista de notificações ou abrir uma tela de notificações
+            },
+          ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -303,8 +299,22 @@ class _MainListViewState extends State<MainListView> {
                                         color: Colors.red,
                                         size: 35,
                                       ),
-                                      onPressed: () async {
-                                        _deleteLista(_listasDeCompras[index].id);
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return RemoveListDialog(
+                                              listName:
+                                                  _listasDeCompras[index].nome,
+                                            );
+                                          },
+                                        ).then((value) {
+                                          if (value != null && value) {
+                                            // Verifica se a exclusão foi confirmada
+                                            _deleteLista(
+                                                _listasDeCompras[index].id);
+                                          }
+                                        });
                                       },
                                     ),
                                     onTap: () async {
@@ -312,8 +322,7 @@ class _MainListViewState extends State<MainListView> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => ItemsList(
-                                            idLista:
-                                                _listasDeCompras[index].id,
+                                            idLista: _listasDeCompras[index].id,
                                             nomeLista:
                                                 _listasDeCompras[index].nome,
                                             precoLista: _listasDeCompras[index]
@@ -342,16 +351,18 @@ class _MainListViewState extends State<MainListView> {
                         );
                       },
                     ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF11E333),
-        shape: const CircleBorder(),
-        onPressed: _showAddListDialog,
-        child: const Icon(
-          Icons.add,
-          size: 40,
-          color: Colors.white,
-        ),
-      ),
+      floatingActionButton: _currentIndex == 1
+          ? FloatingActionButton(
+              backgroundColor: const Color(0xFF11E333),
+              shape: const CircleBorder(),
+              onPressed: _showAddListDialog,
+              child: const Icon(
+                Icons.add,
+                size: 40,
+                color: Colors.white,
+              ),
+            )
+          : null, // Adicionado para mostrar apenas na aba de listas
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -365,8 +376,8 @@ class _MainListViewState extends State<MainListView> {
             label: 'Menu',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Minhas Listas',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Listas',
           ),
         ],
       ),
@@ -389,9 +400,8 @@ class UserProfile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('Nome de usuário: $username'),
+          Text('Bem vindo, $username !'),
           SizedBox(height: 10.0),
-          
           ElevatedButton(
             onPressed: () {
               // Implemente a lógica de logout aqui
@@ -408,4 +418,3 @@ class UserProfile extends StatelessWidget {
     );
   }
 }
-

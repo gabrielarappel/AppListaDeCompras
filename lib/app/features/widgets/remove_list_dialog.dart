@@ -1,36 +1,39 @@
 import 'package:flutter/material.dart';
 
-class RemoveListDialog extends StatelessWidget {
+class RemoveListDialog extends StatefulWidget {
   final String listName;
-  final VoidCallback onConfirm;
 
   const RemoveListDialog({
     required this.listName,
-    required this.onConfirm,
   });
 
   @override
+  _RemoveListDialogState createState() => _RemoveListDialogState();
+}
+
+class _RemoveListDialogState extends State<RemoveListDialog> {
+  bool _confirmouExclusaoLista = false;
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: AlertDialog(
-        title: Text('Confirmar Exclusão'),
-        content: Text('Tem certeza que deseja excluir a lista "$listName"?'),
-        actions: <Widget>[
-          TextButton(
-            child: Text('Cancelar'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text('Excluir'),
-            onPressed: () {
-              Navigator.of(context).pop(); // Fecha o diálogo de confirmação
-              onConfirm(); // Chama a função de confirmação
-            },
-          ),
-        ],
-      ),
+    return AlertDialog(
+      title: Text('Confirmar Exclusão'),
+      content:
+          Text('Tem certeza que deseja excluir a lista "${widget.listName}"?'),
+      actions: <Widget>[
+        TextButton(
+          child: Text('Cancelar'),
+          onPressed: () {
+            Navigator.of(context).pop(); // Fecha o diálogo
+          },
+        ),
+        TextButton(
+          child: Text('Excluir'),
+          onPressed: () {
+            Navigator.of(context).pop(true); // Retorna true ao fechar o diálogo
+          },
+        ),
+      ],
     );
   }
 }
