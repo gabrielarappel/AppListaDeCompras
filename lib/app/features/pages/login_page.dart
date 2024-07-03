@@ -2,6 +2,7 @@ import 'package:app_lista_de_compras/app/features/widgets/create_user_popup.dart
 import 'package:flutter/material.dart';
 import 'main_list.dart';
 import 'user_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,6 +13,42 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  Future<void> _login() async {
+    String username = _usernameController.text;
+    String password = _passwordController.text;
+
+    bool loggedIn = await UserManager.loginUser(username, password);
+
+    if (loggedIn) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('username', username);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainListView(username: username)),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Erro de Login'),
+            content: Text('Usuário ou senha incorretos.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,41 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 20.0),
                       ElevatedButton(
-                        onPressed: () async {
-                          String username = _usernameController.text;
-                          String password = _passwordController.text;
-
-                          bool loggedIn =
-                              await UserManager.loginUser(username, password);
-
-                          if (loggedIn) {
-                            // Navegue para a próxima tela (MainListView)
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      MainListView(username: username)),
-                            );
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text('Erro de Login'),
-                                  content: Text('Usuário ou senha incorretos.'),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      child: Text('OK'),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
+                        onPressed: _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF11E333),
                           padding: EdgeInsets.symmetric(
