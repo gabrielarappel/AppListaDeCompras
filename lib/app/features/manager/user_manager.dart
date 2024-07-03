@@ -43,4 +43,42 @@ class UserManager {
       }
     }
   }
+
+  // Adicionar convite pendente ao usuário
+  static Future<void> addConvitePendente(String username, String listaId) async {
+    DocumentReference userDoc = _firestore.collection(_collection).doc(username);
+    DocumentSnapshot doc = await userDoc.get();
+
+    if (doc.exists) {
+      Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+      List<String> convitesPendentes = List<String>.from(userData['convitesPendentes'] ?? []);
+      if (!convitesPendentes.contains(listaId)) {
+        convitesPendentes.add(listaId);
+        await userDoc.update({'convitesPendentes': convitesPendentes});
+      }
+    }
+  }
+
+  // Aceitar convite pendente e adicionar lista compartilhada
+  static Future<void> aceitarConvite(String username, String listaId) async {
+    DocumentReference userDoc = _firestore.collection(_collection).doc(username);
+    DocumentSnapshot doc = await userDoc.get();
+
+    if (doc.exists) {
+      Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+      List<String> listasDeCompras = List<String>.from(userData['listasDeCompras'] ?? []);
+      List<String> convitesPendentes = List<String>.from(userData['convitesPendentes'] ?? []);
+
+      if (convitesPendentes.contains(listaId)) {
+        convitesPendentes.remove(listaId);
+        if (!listasDeCompras.contains(listaId)) {
+          listasDeCompras.add(listaId);
+          await userDoc.update({'listasDeCompras': listasDeCompras});
+        }
+        await userDoc.update({'convitesPendentes': convitesPendentes});
+      }
+    }
+  }
+
 }
+

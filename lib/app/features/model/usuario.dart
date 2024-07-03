@@ -1,12 +1,14 @@
 class Usuario {
   String username;
   String password;
-  List<String> listasDeCompras; // Exemplo de listas de compras do usuário
+  List<String> listasDeCompras; 
+  List<String> convitesPendentes; 
 
   Usuario({
     required this.username,
     required this.password,
-    this.listasDeCompras = const [], // Inicializa como uma lista vazia
+    this.listasDeCompras = const [],
+    this.convitesPendentes = const [], 
   });
 
   // Método para converter usuário para JSON

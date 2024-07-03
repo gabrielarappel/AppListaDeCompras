@@ -12,7 +12,7 @@ class RemoveListDialog extends StatefulWidget {
 }
 
 class _RemoveListDialogState extends State<RemoveListDialog> {
-  bool _confirmouExclusaoLista = false;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +24,13 @@ class _RemoveListDialogState extends State<RemoveListDialog> {
         TextButton(
           child: Text('Cancelar'),
           onPressed: () {
-            Navigator.of(context).pop(); // Fecha o diálogo
+            Navigator.of(context).pop(); 
           },
         ),
         TextButton(
           child: Text('Excluir'),
           onPressed: () {
-            Navigator.of(context).pop(true); // Retorna true ao fechar o diálogo
+            Navigator.of(context).pop(true); 
           },
         ),
       ],
