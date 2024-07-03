@@ -27,7 +27,7 @@ class _MainListViewState extends State<MainListView> {
   double _somaPrecoLista = 0.0;
   bool _isLoading = false;
   final Uuid _uuid = const Uuid();
-  int _currentIndex = 1; // Alterado para iniciar na aba de listas
+  int _currentIndex = 1; 
 
   @override
   void initState() {
@@ -156,7 +156,7 @@ void _addListaFromFirestoreData(String id, Map<String, dynamic> data, List<Lista
     }
   }
 
-  void _showAddListDialog() {
+  void _showAddUserInListDialog() {
   showDialog(
     context: context,
     builder: (context) {
@@ -182,6 +182,46 @@ void _addListaFromFirestoreData(String id, Map<String, dynamic> data, List<Lista
     },
   );
 }
+
+void _showAddListDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AddListDialog(
+          onAdd: (newListName) async {
+            try {
+              String newId = _uuid.v4();
+              ListaDeCompra newList = ListaDeCompra(
+                id: newId,
+                nome: newListName,
+                preco: 0.0,
+                produtos: [],
+              );
+
+              // Adiciona a nova lista ao Firestore
+              await FirebaseFirestore.instance
+                  .collection('listas_de_compras')
+                  .doc(newId)
+                  .set({
+                'nome': newListName,
+                'preco': 0.0,
+                'username': widget.username,
+                'produtos': [],
+              });
+
+              setState(() {
+                _listasDeCompras.add(newList);
+                _updateSomaPrecoLista();
+              });
+            } catch (e) {
+              print('Erro ao adicionar lista: $e');
+            }
+          },
+        );
+      },
+    );
+  }
+
 
 
   void _showEditListDialog(int index) {
