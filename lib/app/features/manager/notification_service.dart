@@ -5,6 +5,11 @@ class NotificationService {
   static void incrementNotificationCount() {
     unreadNotificationsCount++;
   }
+static void decrementNotificationCount() {
+    if (unreadNotificationsCount > 0) {
+      unreadNotificationsCount--;
+    }
+  }
 
   static void clearNotifications() {
     unreadNotificationsCount = 0;
