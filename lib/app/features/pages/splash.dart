@@ -1,8 +1,9 @@
-import 'package:app_lista_de_compras/app/features/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 class SplashView extends StatefulWidget {
-  const SplashView({super.key});
+  final Widget nextPage;
+
+  const SplashView({Key? key, required this.nextPage}) : super(key: key);
 
   @override
   State<SplashView> createState() => _SplashViewState();
@@ -12,15 +13,19 @@ class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
+    _navigateToNextPage();
+  }
+
+  void _navigateToNextPage() async {
+    await Future.delayed(const Duration(seconds: 2));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => widget.nextPage),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => LoginPage()));
-    });
-
     return Scaffold(
       body: InkWell(
         child: Stack(children: [
@@ -42,8 +47,10 @@ class _SplashViewState extends State<SplashView> {
             ),
           ),
         ]),
-        onTap: () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => LoginPage())),
+        onTap: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => widget.nextPage),
+        ),
       ),
     );
   }

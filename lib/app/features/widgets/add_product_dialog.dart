@@ -48,75 +48,77 @@ class AddProductDialogState extends State<AddProductDialog> {
         borderRadius: BorderRadius.circular(12),
       ),
       title: Text(widget.initialProduto == null ? "Adicione um produto" : "Edite o produto"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 12),
-          TextField(
-            controller: _nomeController,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: 'Nome do produto',
-              errorText: _errorText,
-            ),
-            onChanged: (String value) {
-              setState(() {
-                _produto.nomeProduto = value;
-                _errorText = null;
-              });
-            },
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 110,
-                child: TextField(
-                  controller: _precoController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Preço',
-                    labelStyle: TextStyle(fontSize: 12), 
-                     
-                    hintText: 'Preço',
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  onChanged: (String value) {
-                    _produto.preco = double.tryParse(value) ?? 0.0;
-                  },
-                ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            TextField(
+              controller: _nomeController,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: 'Nome do produto',
+                errorText: _errorText,
               ),
-              SizedBox(
-                width: 90,
-                child: TextField(
-                  controller: _quantidadeController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Quantidade', 
-                    labelStyle: TextStyle(fontSize: 12), 
-                    hintText: 'quantidade',
-                  ),
-                  onChanged: (String value) {
-                    _produto.quantidade = int.tryParse(value) ?? 1;
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _categoriaController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Categoria',
+              onChanged: (String value) {
+                setState(() {
+                  _produto.nomeProduto = value;
+                  _errorText = null;
+                });
+              },
             ),
-            onChanged: (String value) {
-              _produto.categoria = value;
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: 110,
+                  child: TextField(
+                    controller: _precoController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Preço',
+                      labelStyle: TextStyle(fontSize: 12), 
+                       
+                      hintText: 'Preço',
+                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (String value) {
+                      _produto.preco = double.tryParse(value) ?? 0.0;
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 90,
+                  child: TextField(
+                    controller: _quantidadeController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Quantidade', 
+                      labelStyle: TextStyle(fontSize: 12), 
+                      hintText: 'quantidade',
+                    ),
+                    onChanged: (String value) {
+                      _produto.quantidade = int.tryParse(value) ?? 1;
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _categoriaController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Categoria',
+              ),
+              onChanged: (String value) {
+                _produto.categoria = value;
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
       ),
       actions: [
         Row(
